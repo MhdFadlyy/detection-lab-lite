@@ -1,6 +1,7 @@
 """Shared helpers for the detection-lab-lite harness."""
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import pathlib
@@ -116,15 +117,12 @@ def count_wazuh_alerts(since_epoch: float) -> int:
 
 # --- Falco (events.json in the container) ------------------------------------
 def _falco_time_epoch(ev: dict) -> float:
-    t = ev.get("time", "")
+    t = ev.get("time", "").rstrip("Z")
+    if "." in t:  # 2026-09-07T14:00:00.123456789 -> trim ns to us
+        head, frac = t.split(".", 1)
+        t = f"{head}.{frac[:6]}"
     try:
-        # 2026-09-07T14:00:00.123456789Z -> trim ns to us
-        t = t.rstrip("Z")
-        if "." in t:
-            head, frac = t.split(".", 1)
-            t = f"{head}.{frac[:6]}"
-        import datetime as _dt
-        return _dt.datetime.fromisoformat(t).replace(tzinfo=_dt.timezone.utc).timestamp()
+        return dt.datetime.fromisoformat(t).replace(tzinfo=dt.UTC).timestamp()
     except ValueError:
         return 0.0
 
