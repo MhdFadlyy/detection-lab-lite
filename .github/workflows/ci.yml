@@ -1,0 +1,57 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install ruff yamllint sigma-cli
+      - run: ruff check harness/
+      - run: yamllint -d relaxed detections/ attacks/
+      - run: sigma check detections/ || true   # informational until pipeline lands
+
+  replay:
+    runs-on: ubuntu-latest        # 16 GB / 4 vCPU — fits the tuned stack
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r harness/requirements.txt
+      - name: Configure low-memory profile
+        run: |
+          sudo sysctl -w vm.max_map_count=262144
+          cp .env.example .env
+          echo "INDEXER_JAVA_OPTS=-Xms1g -Xmx1g" >> .env
+      - name: Bootstrap + start (CI profile — no honeypots/grafana)
+        run: |
+          ./lab bootstrap
+          COMPOSE_PROFILES= ./lab up
+      - name: Wait for Wazuh indexer
+        run: |
+          for i in $(seq 1 60); do
+            curl -sk -u admin:SecretPassword https://localhost:9200 && break || sleep 10
+          done
+      - name: Replay all scenarios
+        run: |
+          set -e
+          for s in attacks/scenarios/*.yml; do
+            tid=$(basename "$s" | cut -d_ -f1)
+            python3 harness/runner.py "$tid"
+          done
+          python3 harness/verify.py --all
+      - name: Coverage report
+        if: always()
+        run: python3 harness/report.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: attack-coverage
+          path: |
+            docs/coverage.md
+            docs/navigator-layer.json

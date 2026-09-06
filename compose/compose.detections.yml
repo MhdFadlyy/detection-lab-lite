@@ -1,0 +1,30 @@
+services:
+  suricata:
+    image: jasonish/suricata:7.0
+    container_name: dll-suricata
+    network_mode: host          # needs to see real traffic on the host NIC
+    cap_add: [NET_ADMIN, NET_RAW, SYS_NICE]
+    command: >
+      -i ${SURICATA_IFACE:-eth0}
+      --set outputs.1.eve-log.filename=/var/log/suricata/eve.json
+    volumes:
+      - suricata_logs:/var/log/suricata
+      # Uses the image's default suricata.yaml. Drop a custom one here later:
+      # - ./suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
+    restart: unless-stopped
+
+  falco:
+    image: falcosecurity/falco:0.39.2
+    container_name: dll-falco
+    privileged: true            # runtime syscall visibility on the host kernel
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - /proc:/host/proc:ro
+      - /etc:/host/etc:ro
+      - ./falco/falco_rules.local.yaml:/etc/falco/falco_rules.local.yaml:ro
+      - ../detections/falco:/etc/falco/rules.d:ro
+    restart: unless-stopped
+
+volumes:
+  suricata_logs:

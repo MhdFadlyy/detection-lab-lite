@@ -1,0 +1,23 @@
+# detection-lab-lite auditd rules — enough signal for the starter detections.
+-D
+-b 8192
+-f 1
+
+# execve (process execution)
+-a always,exit -F arch=b64 -S execve -k dll_exec
+-a always,exit -F arch=b32 -S execve -k dll_exec
+
+# credential file access
+-w /etc/shadow -p wra -k dll_cred_access
+-w /etc/passwd -p wa  -k dll_cred_access
+-w /etc/sudoers -p wa -k dll_priv
+
+# persistence surfaces
+-w /etc/crontab -p wa -k dll_persistence
+-w /etc/cron.d -p wa -k dll_persistence
+-w /etc/systemd/system -p wa -k dll_persistence
+-w /root/.ssh/authorized_keys -p wa -k dll_persistence
+
+# discovery
+-w /usr/bin/whoami -p x -k dll_discovery
+-w /usr/bin/id -p x -k dll_discovery

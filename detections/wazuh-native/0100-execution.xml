@@ -1,0 +1,19 @@
+<!--
+  Hand-written Wazuh rules for detections that pySigma-backend cannot express cleanly
+  (see README "Sigma caveat"). IDs in the 100200-100999 range.
+  These match auditd execve events decoded by Wazuh's built-in audit ruleset (rule 80700+).
+-->
+<group name="detection-lab-lite,linux,execution,">
+
+  <rule id="100210" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.command">bash</field>
+    <match>/dev/tcp/</match>
+    <description>Bash reverse shell via /dev/tcp (T1059.004)</description>
+    <mitre>
+      <id>T1059.004</id>
+      <id>T1071</id>
+    </mitre>
+  </rule>
+
+</group>

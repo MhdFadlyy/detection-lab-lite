@@ -1,0 +1,25 @@
+services:
+  cowrie:
+    image: cowrie/cowrie:latest
+    container_name: dll-cowrie
+    ports:
+      - "2222:2222"   # SSH honeypot (map host 22 here if you want it front-line)
+      - "2223:2223"   # Telnet honeypot
+    volumes:
+      - cowrie_logs:/cowrie/cowrie-git/var/log/cowrie
+      - ./cowrie/cowrie.cfg:/cowrie/cowrie-git/etc/cowrie.cfg:ro
+    restart: unless-stopped
+
+  opencanary:
+    image: thinkst/opencanary:latest
+    container_name: dll-opencanary
+    ports:
+      - "2121:21"     # FTP
+      - "8080:80"     # HTTP
+    volumes:
+      - cowrie_logs:/var/log/cowrie      # reuse the shared log volume path
+    restart: unless-stopped
+    profiles: ["full"]                   # optional; enable with COMPOSE_PROFILES=full
+
+volumes:
+  cowrie_logs:

@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# detection-lab-lite control CLI. Docker only, no VM.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
+
+# --- config ---------------------------------------------------------------
+[ -f .env ] || cp .env.example .env
+set -a; . ./.env; set +a
+: "${WAZUH_DOCKER_REF:=v4.14.7}"
+: "${COMPOSE_PARALLEL_LIMIT:=1}"
+export COMPOSE_PARALLEL_LIMIT
+WAZUH_DIR=".wazuh-docker"
+WAZUH_SINGLE="$WAZUH_DIR/single-node/docker-compose.yml"
+
+# Compose file stack: upstream Wazuh single-node + our overlays.
+COMPOSE_ARGS=(-p detection-lab
+  -f "$WAZUH_SINGLE"
+  -f compose/compose.overlay.yml
+  -f compose/compose.detections.yml
+  -f compose/compose.honeypots.yml
+  -f compose/compose.targets.yml
+  -f compose/compose.viz.yml)
+
+log() { printf '\033[1;36m[lab]\033[0m %s\n' "$*"; }
+die() { printf '\033[1;31m[lab] %s\033[0m\n' "$*" >&2; exit 1; }
+
+# --- commands ------------------------------------------------------------
+cmd_bootstrap() {
+  if [ ! -d "$WAZUH_DIR/.git" ]; then
+    log "cloning wazuh-docker $WAZUH_DOCKER_REF (one download)"
+    git clone --depth 1 --branch "$WAZUH_DOCKER_REF" \
+      https://github.com/wazuh/wazuh-docker.git "$WAZUH_DIR"
+  else
+    log "wazuh-docker already present ($(git -C "$WAZUH_DIR" describe --tags 2>/dev/null || echo unknown))"
+  fi
+  if [ ! -f "$WAZUH_DIR/single-node/config/wazuh_indexer_ssl_certs/root-ca.pem" ]; then
+    log "generating indexer certs (one-time)"
+    docker compose -f "$WAZUH_DIR/single-node/generate-indexer-certs.yml" run --rm generator
+  else
+    log "indexer certs already generated"
+  fi
+  log "bootstrap done — run './lab up'"
+}
+
+_require_bootstrap() { [ -f "$WAZUH_SINGLE" ] || die "run './lab bootstrap' first"; }
+
+cmd_pull() {
+  _require_bootstrap
+  log "pulling images sequentially (COMPOSE_PARALLEL_LIMIT=$COMPOSE_PARALLEL_LIMIT)"
+  # explicit ordered loop so downloads never overlap
+  for svc in $(docker compose "${COMPOSE_ARGS[@]}" config --services); do
+    log "pull: $svc"
+    docker compose "${COMPOSE_ARGS[@]}" pull --policy missing "$svc" || true
+  done
+}
+
+cmd_up() {
+  _require_bootstrap
+  cmd_pull
+  log "starting stack"
+  docker compose "${COMPOSE_ARGS[@]}" up -d --build
+  log "dashboard: https://localhost:443   grafana: http://localhost:3000"
+  log "wait ~3-5 min, then './lab status'"
+}
+
+cmd_down() { _require_bootstrap; docker compose "${COMPOSE_ARGS[@]}" down "${@:-}"; }
+cmd_status() { _require_bootstrap; docker compose "${COMPOSE_ARGS[@]}" ps; }
+cmd_logs() { _require_bootstrap; docker compose "${COMPOSE_ARGS[@]}" logs -f "$@"; }
+
+cmd_attack()  { exec python3 harness/runner.py "$@"; }
+cmd_verify()  { exec python3 harness/verify.py "$@"; }
+cmd_report()  { exec python3 harness/report.py "$@"; }
+
+usage() {
+  cat <<'EOF'
+detection-lab-lite
+
+  ./lab bootstrap        clone wazuh-docker + generate certs (run once)
+  ./lab up               pull (sequential) + start the whole stack
+  ./lab down [-v]        stop the stack (-v also drops volumes)
+  ./lab status           container health
+  ./lab logs [svc...]    follow logs
+  ./lab pull             pull images, one at a time
+  ./lab attack <TID>     run an attack scenario against target-linux
+  ./lab verify <TID>     assert the expected alert fired
+  ./lab report           regenerate ATT&CK coverage matrix + navigator layer
+EOF
+}
+
+main() {
+  local cmd="${1:-help}"; shift || true
+  case "$cmd" in
+    bootstrap) cmd_bootstrap "$@" ;;
+    up)        cmd_up "$@" ;;
+    down)      cmd_down "$@" ;;
+    status)    cmd_status "$@" ;;
+    logs)      cmd_logs "$@" ;;
+    pull)      cmd_pull "$@" ;;
+    attack)    cmd_attack "$@" ;;
+    verify)    cmd_verify "$@" ;;
+    report)    cmd_report "$@" ;;
+    help|-h|--help) usage ;;
+    *) usage; exit 1 ;;
+  esac
+}
+main "$@"

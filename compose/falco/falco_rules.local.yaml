@@ -1,0 +1,4 @@
+# Local Falco tuning. Project detection rules live in detections/falco/ (mounted at rules.d).
+# Add exceptions / macro overrides here to cut lab noise.
+- macro: dll_lab_noise
+  condition: (container.name in ("dll-grafana"))

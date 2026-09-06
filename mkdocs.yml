@@ -1,0 +1,19 @@
+site_name: detection-lab-lite
+site_description: A laptop-friendly, Linux-first mini-SOC with detection-as-code
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: green
+  features:
+    - navigation.sections
+    - content.code.copy
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - ATT&CK coverage: coverage.md
+  - Plan: plan.md
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - tables

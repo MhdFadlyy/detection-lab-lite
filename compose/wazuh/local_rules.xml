@@ -1,0 +1,20 @@
+<!-- detection-lab-lite local rules. Sigma-derived rules live in detections/wazuh-native/
+     and are loaded from etc/rules/detection-lab-lite. Keep this file for glue rules only. -->
+<group name="detection-lab-lite,local,">
+
+  <rule id="100001" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="event_type">alert</field>
+    <description>Suricata: eve.json alert event (base)</description>
+  </rule>
+
+  <rule id="100002" level="6">
+    <if_sid>100001</if_sid>
+    <field name="alert.signature">\.+</field>
+    <description>Suricata alert: $(alert.signature)</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+  </rule>
+
+</group>

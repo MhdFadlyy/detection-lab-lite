@@ -1,0 +1,4 @@
+requests>=2.31
+PyYAML>=6.0
+sigma-cli>=1.0
+pySigma-backend-opensearch>=1.0

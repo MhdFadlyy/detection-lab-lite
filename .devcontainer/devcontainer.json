@@ -1,0 +1,9 @@
+{
+  "name": "detection-lab-lite",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "postCreateCommand": "pip install -r harness/requirements.txt ruff yamllint mkdocs-material",
+  "hostRequirements": { "cpus": 4, "memory": "16gb" }
+}

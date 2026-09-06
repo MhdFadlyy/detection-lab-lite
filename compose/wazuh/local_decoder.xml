@@ -1,0 +1,2 @@
+<!-- detection-lab-lite local decoders. JSON logs (Suricata/Cowrie) are decoded natively
+     by Wazuh's json decoder; add custom text decoders here if you introduce plain-text sensors. -->

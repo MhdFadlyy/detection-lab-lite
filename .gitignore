@@ -1,0 +1,8 @@
+.env
+.wazuh-docker/
+attacks/scenarios/.last-run
+docs/navigator-layer.json
+__pycache__/
+*.pyc
+.venv/
+site/

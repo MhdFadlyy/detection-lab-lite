@@ -1,0 +1,24 @@
+# Overlay on top of wazuh-docker/single-node/docker-compose.yml.
+# Only patches; the upstream file owns the base service definitions.
+services:
+  wazuh.indexer:
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=${INDEXER_JAVA_OPTS:--Xms1g -Xmx1g}"
+
+  wazuh.manager:
+    environment:
+      - "INDEXER_JAVA_OPTS=${INDEXER_JAVA_OPTS:--Xms1g -Xmx1g}"
+    volumes:
+      # Override upstream's manager config with ours (adds Suricata + Cowrie localfiles
+      # and loads detection-lab-lite custom rules/decoders).
+      - ../compose/wazuh/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf
+      - ../compose/wazuh/local_rules.xml:/wazuh-config-mount/etc/rules/local_rules.xml
+      - ../compose/wazuh/local_decoder.xml:/wazuh-config-mount/etc/decoders/local_decoder.xml
+      - ../detections/wazuh-native:/wazuh-config-mount/etc/rules/detection-lab-lite:ro
+      # Shared log volumes written by the sensor containers.
+      - suricata_logs:/var/log/suricata:ro
+      - cowrie_logs:/var/log/cowrie:ro
+
+volumes:
+  suricata_logs:
+  cowrie_logs:

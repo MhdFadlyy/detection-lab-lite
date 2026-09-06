@@ -1,0 +1,13 @@
+services:
+  target-linux:
+    build: ./target-linux
+    container_name: dll-target-linux
+    hostname: target-linux
+    cap_add: [SYS_ADMIN, SYS_PTRACE, AUDIT_CONTROL, AUDIT_READ]
+    security_opt: ["seccomp:unconfined", "apparmor:unconfined"]
+    # The victim. Attacks land here; the Wazuh agent + auditd ship telemetry.
+    volumes:
+      - ../attacks:/opt/attacks:ro
+    environment:
+      - WAZUH_MANAGER=wazuh.manager
+    restart: unless-stopped
