@@ -25,8 +25,14 @@
 
 ## Roadmap
 
-- [x] Week 1 — stack + `lab` CLI + first detection
-- [x] Week 2 — harness (`sigma_build`, Atomic Red Team wrapper), 12 detections across 6 tactics
-- [ ] Week 3 — CI full replay green, Navigator layer, Grafana dashboard, Falco scenarios
-- [ ] Week 4 — mkdocs site + Pages, demo GIF, `v0.1.0`
-- [ ] Later — Windows/Sysmon target, Caldera integration
+Capability stages, ordered by dependency — not a schedule. This is a long-lived project;
+detections keep being added regardless of which stage is "current".
+
+- [x] **Stage 1 — Foundation** — stack + `lab` CLI + first detection + public repo
+- [~] **Stage 2 — Detection library** — harness (`sigma_build`, Atomic Red Team wrapper) +
+  detections across the ATT&CK tactics, each with a self-contained scenario *(ongoing)*
+- [ ] **Stage 3 — Continuous validation** — CI boots the stack headless and `./lab test` goes
+  green; ATT&CK Navigator layer; Falco 2nd engine + scenarios; OpenCanary; Grafana dashboard
+- [ ] **Stage 4 — Polish & first release** — mkdocs site content, demo GIF, README screenshots,
+  issue/PR templates, tag `v0.1.0`, writeup
+- [ ] **Ongoing** — Windows + Sysmon target, Caldera, scheduled feed updates, community PRs

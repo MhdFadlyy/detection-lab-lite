@@ -19,8 +19,8 @@ jobs:
   replay:
     runs-on: ubuntu-latest        # 16 GB / 4 vCPU — fits the tuned stack
     needs: lint
-    # Informational until Week 3 hardens the headless Wazuh boot. Local
-    # `./lab up && ./lab test` is the Week 2 gate. Does not fail the workflow.
+    # Informational until Stage 3 hardens the headless Wazuh boot. Local
+    # `./lab up && ./lab test` is the current gate. Does not fail the workflow.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4

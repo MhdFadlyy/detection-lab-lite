@@ -64,11 +64,13 @@ naive conversions match too broadly. This project:
 
 ## Status
 
-Week 2: harness complete (`runner` / `verify` / `report` / `sigma_build` / Atomic Red Team
-wrapper) and **12 detections across 6 ATT&CK tactics**, each with a self-contained attack
-scenario. Run `./lab up` once, then `./lab test` to replay every scenario and assert the
-alerts. See [coverage](docs/coverage.md), the [project plan](docs/plan.md), and
-`CONTRIBUTING.md` for the roadmap.
+**Stage 2 — Detection library** (ongoing). Harness is complete (`runner` / `verify` / `report`
+/ `sigma_build` / Atomic Red Team wrapper) and there are **12 detections across 6 ATT&CK
+tactics**, each with a self-contained attack scenario. Run `./lab up` once, then `./lab test`
+to replay every scenario and assert the alerts.
+
+This is a long-lived project with no deadline — see [coverage](docs/coverage.md), the
+[project plan](docs/plan.md), and `CONTRIBUTING.md` for the capability-stage roadmap.
 
 ## License
 
