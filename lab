@@ -11,6 +11,9 @@ set -a; . ./.env; set +a
 : "${WAZUH_DOCKER_REF:=v4.14.7}"
 : "${COMPOSE_PARALLEL_LIMIT:=1}"
 export COMPOSE_PARALLEL_LIMIT
+# Absolute repo root for compose var-substitution (works regardless of which
+# directory compose treats as the project directory).
+export DLL_ROOT="$ROOT"
 WAZUH_DIR=".wazuh-docker"
 WAZUH_SINGLE="$WAZUH_DIR/single-node/docker-compose.yml"
 

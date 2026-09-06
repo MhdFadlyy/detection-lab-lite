@@ -10,7 +10,7 @@ services:
     volumes:
       - suricata_logs:/var/log/suricata
       # Uses the image's default suricata.yaml. Drop a custom one here later:
-      # - ./suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
+      # - ${DLL_ROOT}/compose/suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
     restart: unless-stopped
 
   falco:
@@ -22,8 +22,8 @@ services:
       - /var/run/docker.sock:/host/var/run/docker.sock
       - /proc:/host/proc:ro
       - /etc:/host/etc:ro
-      - ./falco/falco_rules.local.yaml:/etc/falco/falco_rules.local.yaml:ro
-      - ../detections/falco:/etc/falco/rules.d:ro
+      - ${DLL_ROOT}/compose/falco/falco_rules.local.yaml:/etc/falco/falco_rules.local.yaml:ro
+      - ${DLL_ROOT}/detections/falco:/etc/falco/rules.d:ro
     restart: unless-stopped
 
 volumes:
