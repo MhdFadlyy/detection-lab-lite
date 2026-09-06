@@ -35,7 +35,7 @@ class Scenario:
     path: pathlib.Path
 
     @classmethod
-    def load(cls, tid: str) -> "Scenario":
+    def load(cls, tid: str) -> Scenario:
         matches = sorted(SCENARIOS.glob(f"{tid}*.yml"))
         if not matches:
             raise SystemExit(f"no scenario for {tid} in {SCENARIOS}")
