@@ -18,6 +18,6 @@ falsepositives:
   - Shell prompts, scripts checking privileges — noisy on its own; value is in correlation
 level: low
 dll:
-  wazuh_native: true
-  wazuh_rule_id: "100510"
+  engine: falco
+  falco_rule: DLL Discovery Commands
   scenario: T1033_whoami_id

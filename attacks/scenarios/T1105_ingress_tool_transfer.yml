@@ -6,5 +6,5 @@ command: |
   timeout 5 curl -fsS -o /tmp/dll_payload http://wazuh.dashboard:5601/ || true ;
   ls -l /tmp/dll_payload 2>/dev/null ; rm -f /tmp/dll_payload
 expect:
-  engine: wazuh
-  rule_id: "100711"
+  engine: falco
+  rule: DLL Ingress Tool Transfer

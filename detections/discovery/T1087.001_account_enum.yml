@@ -19,6 +19,6 @@ falsepositives:
   - Login shells, NSS tooling
 level: low
 dll:
-  wazuh_native: true
-  wazuh_rule_id: "100511"
+  engine: falco
+  falco_rule: DLL Discovery Commands
   scenario: T1087.001_account_enum

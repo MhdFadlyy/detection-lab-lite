@@ -63,7 +63,8 @@ def main() -> int:
         GENERATED.mkdir(parents=True)
 
     for path, doc in files:
-        if doc.get("dll", {}).get("wazuh_native"):
+        dll = doc.get("dll", {})
+        if dll.get("wazuh_native") or dll.get("engine") == "falco":
             native += 1
             continue
         ok, out = convert_one(path)

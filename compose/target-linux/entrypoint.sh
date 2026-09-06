@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-# auditd needs the host to share the audit netlink socket (CAP_AUDIT_*). Best-effort:
-service auditd start 2>/dev/null || auditd 2>/dev/null || echo "[target] auditd unavailable (kernel audit not shared) — continuing"
-augenrules --load 2>/dev/null || true
+# Enroll (idempotent — skips if a key already exists) then start the agent.
+if ! grep -q . /var/ossec/etc/client.keys 2>/dev/null; then
+  echo "[target] enrolling with wazuh.manager"
+  /var/ossec/bin/agent-auth -m wazuh.manager -A target-linux || \
+    echo "[target] agent-auth failed; relying on <enrollment> auto-register"
+fi
 
-# Wazuh agent
 /var/ossec/bin/wazuh-control start
 
-# keep container alive, stream agent log
 touch /var/ossec/logs/ossec.log
 exec tail -F /var/ossec/logs/ossec.log

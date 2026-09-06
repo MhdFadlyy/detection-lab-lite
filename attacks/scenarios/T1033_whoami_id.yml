@@ -3,5 +3,5 @@ description: Run whoami and id (post-exploitation orientation)
 runner: script
 command: whoami ; id ; id -un
 expect:
-  engine: wazuh
-  rule_id: "100510"
+  engine: falco
+  rule: DLL Discovery Commands

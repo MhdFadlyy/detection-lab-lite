@@ -42,6 +42,29 @@ jobs:
           done
       - name: Replay all scenarios + verify
         run: ./lab test
+      - name: Diagnostics (on failure)
+        if: failure()
+        run: |
+          set +e
+          echo "::group::wazuh agents"
+          docker compose -p detection-lab exec -T wazuh.manager /var/ossec/bin/agent_control -l
+          echo "::endgroup::"
+          echo "::group::target-linux agent"
+          docker exec dll-target-linux /var/ossec/bin/wazuh-control status
+          docker exec dll-target-linux sh -c 'tail -n 120 /var/ossec/logs/ossec.log'
+          echo "::endgroup::"
+          echo "::group::auditd in target"
+          docker exec dll-target-linux sh -c 'command -v auditctl && auditctl -s; ls -l /var/log/audit 2>&1'
+          echo "::endgroup::"
+          echo "::group::falco"
+          docker logs --tail 120 dll-falco 2>&1
+          docker exec dll-falco sh -c 'wc -l /tmp/falco_events.json 2>&1; tail -n 20 /tmp/falco_events.json 2>&1'
+          echo "::endgroup::"
+          echo "::group::indexer alert count"
+          curl -sk -u admin:SecretPassword 'https://localhost:9200/wazuh-alerts-*/_count'
+          echo
+          curl -sk -u admin:SecretPassword 'https://localhost:9200/_cat/indices?v' | grep -i wazuh
+          echo "::endgroup::"
       - name: Coverage report
         if: always()
         run: python3 harness/report.py

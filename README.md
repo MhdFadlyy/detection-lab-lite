@@ -21,8 +21,8 @@ asserting the alert fires.
 |---|---|
 | **SIEM** | Wazuh single-node (manager + indexer + dashboard) |
 | **Network IDS** | Suricata (EVE JSON → Wazuh) |
-| **Runtime** | Falco (2nd detection engine, host syscalls) |
-| **Endpoint** | `target-linux` container: Wazuh agent + auditd |
+| **Runtime** | Falco (2nd detection engine, host syscalls via eBPF) |
+| **Endpoint** | `target-linux` container: Wazuh agent (FIM / inotify) + Falco eBPF |
 | **Honeypots** | Cowrie (SSH/Telnet), OpenCanary (`full` profile) |
 | **Attacks** | Atomic Red Team + custom scenarios in `attacks/scenarios/` |
 | **Detections** | Sigma (`detections/`) + hand-written Wazuh rules where Sigma falls short |
@@ -32,19 +32,23 @@ asserting the alert fires.
 ## Architecture
 
 ```
-attacks/scenarios/*.yml ──► target-linux (auditd + agent)
+attacks/scenarios/*.yml ──► target-linux (Wazuh agent: FIM)
                             suricata (host NIC)   cowrie/opencanary
-                                   │ logs
-                    ┌──────────────┴───────────────┐
-                    ▼                              ▼
-          Wazuh (manager/indexer/dashboard)     Falco
-                    │  alerts API                │
-                    └──────────────┬─────────────┘
-                                   ▼
-              harness/verify.py  (assert alert fired)
-              harness/report.py  (ATT&CK Navigator layer + coverage.md)
+                                   │ logs                    │ eBPF syscalls
+                    ┌──────────────┴───────────────┐         ▼
+                    ▼                              ▼      Falco  ──► /tmp/falco_events.json
+          Wazuh (manager/indexer/dashboard)  ◄────┘
+                    │  alerts API
+                    ▼
+              harness/verify.py   engine: wazuh → query indexer
+                                  engine: falco → read Falco events
+              harness/report.py   ATT&CK Navigator layer + coverage.md
               Grafana "SOC overview"
 ```
+
+Two detection engines: **Wazuh FIM** for file changes (persistence, credential-file
+writes) and **Falco/eBPF** for process, file-read and network activity. Each scenario
+declares which engine verifies it.
 
 ## Requirements
 

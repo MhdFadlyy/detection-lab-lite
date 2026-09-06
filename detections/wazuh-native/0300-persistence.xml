@@ -1,31 +1,36 @@
-<!-- Persistence (T1053, T1543, T1098, T1136) -->
-<group name="detection-lab-lite,linux,persistence,">
+<!--
+  Persistence (T1053, T1543, T1098, T1136) — driven by Wazuh FIM (syscheck),
+  which is inotify-based and works inside a container (unlike auditd).
+  Agent watches the paths below in real time (compose/target-linux/ossec.conf).
+  IDs 1003xx.
+-->
+<group name="detection-lab-lite,linux,persistence,syscheck,">
 
   <rule id="100310" level="10">
-    <if_sid>100200</if_sid>
-    <field name="audit.command">crontab</field>
-    <description>crontab modified via CLI — scheduled task persistence (T1053.003)</description>
+    <if_group>syscheck</if_group>
+    <field name="file">/var/spool/cron|/etc/cron</field>
+    <description>Cron file created or modified — scheduled task persistence (T1053.003)</description>
     <mitre><id>T1053.003</id></mitre>
   </rule>
 
   <rule id="100311" level="10">
-    <if_sid>100201</if_sid>
-    <field name="audit.file.name">/etc/systemd/system/\.+</field>
+    <if_group>syscheck</if_group>
+    <field name="file">^/etc/systemd/system/</field>
     <description>systemd unit file created or modified — service persistence (T1543.002)</description>
     <mitre><id>T1543.002</id></mitre>
   </rule>
 
   <rule id="100312" level="12">
-    <if_sid>100201</if_sid>
-    <field name="audit.file.name">\.+authorized_keys</field>
-    <description>SSH authorized_keys modified — account persistence (T1098.004)</description>
+    <if_group>syscheck</if_group>
+    <field name="file">authorized_keys$</field>
+    <description>SSH authorized_keys created or modified — account persistence (T1098.004)</description>
     <mitre><id>T1098.004</id></mitre>
   </rule>
 
   <rule id="100313" level="10">
-    <if_sid>100200</if_sid>
-    <field name="audit.command">useradd|adduser</field>
-    <description>Local account created (T1136.001)</description>
+    <if_group>syscheck</if_group>
+    <field name="file">^/etc/passwd$|^/etc/shadow$</field>
+    <description>/etc/passwd or /etc/shadow modified — local account created/changed (T1136.001)</description>
     <mitre><id>T1136.001</id></mitre>
   </rule>
 

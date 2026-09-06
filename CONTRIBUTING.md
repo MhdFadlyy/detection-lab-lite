@@ -2,20 +2,24 @@
 
 ## Add a detection in ~5 minutes
 
-1. **Write the Sigma rule** in `detections/<tactic>/T<id>_<name>.yml`. Tag it with
-   `attack.t<id>` so it lands on the coverage matrix.
-2. **Add an attack scenario** in `attacks/scenarios/T<id>_<name>.yml`:
+1. **Write the Sigma rule** in `detections/<tactic>/T<id>_<name>.yml` (portable intent).
+   Tag it with `attack.t<id>` so it lands on the coverage matrix, and set `dll.engine`.
+2. **Pick an engine and add the firing rule:**
+   - **File change** (persistence, credential-file write) → **Wazuh FIM**. Add the watched
+     path to `compose/target-linux/ossec.conf` and a rule in
+     `detections/wazuh-native/` keyed on `<if_group>syscheck</if_group>`.
+   - **Process / file-read / network** → **Falco**. Add a rule to
+     `detections/falco/dll_rules.yaml` (or reuse a stock one).
+3. **Add an attack scenario** in `attacks/scenarios/T<id>_<name>.yml`:
    ```yaml
    technique: T1053.003
    description: Cron persistence
    runner: script
    command: (crontab -l 2>/dev/null; echo "* * * * * id") | crontab -
    expect:
-     engine: wazuh
-     rule_id: "100310"
+     engine: wazuh          # or: falco
+     rule_id: "100310"      # wazuh rule id  — or `rule: DLL ...` for falco
    ```
-3. **If Sigma → Wazuh conversion is lossy**, add a hand rule in
-   `detections/wazuh-native/` and point `dll.wazuh_rule_id` at it.
 4. **Test locally:**
    ```
    ./lab attack T1053.003 && ./lab verify T1053.003

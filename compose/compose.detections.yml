@@ -22,6 +22,7 @@ services:
       - /var/run/docker.sock:/host/var/run/docker.sock
       - /proc:/host/proc:ro
       - /etc:/host/etc:ro
+      - ${DLL_ROOT}/compose/falco/dll.yaml:/etc/falco/config.d/dll.yaml:ro
       - ${DLL_ROOT}/compose/falco/falco_rules.local.yaml:/etc/falco/falco_rules.local.yaml:ro
       - ${DLL_ROOT}/detections/falco:/etc/falco/rules.d:ro
     restart: unless-stopped

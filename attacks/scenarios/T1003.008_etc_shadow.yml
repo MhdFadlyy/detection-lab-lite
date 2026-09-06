@@ -5,5 +5,5 @@ command: |
   cat /etc/passwd > /tmp/dll_passwd ; cat /etc/shadow > /tmp/dll_shadow 2>/dev/null || true ;
   rm -f /tmp/dll_passwd /tmp/dll_shadow
 expect:
-  engine: wazuh
-  rule_id: "100410"
+  engine: falco
+  rule: DLL Sensitive File Read

@@ -19,6 +19,6 @@ falsepositives:
   - Backup jobs, security scanners (rare, usually allowlisted)
 level: high
 dll:
-  wazuh_native: true
-  wazuh_rule_id: "100410"
+  engine: falco
+  falco_rule: DLL Sensitive File Read
   scenario: T1003.008_etc_shadow

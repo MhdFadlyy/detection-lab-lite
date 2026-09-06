@@ -3,5 +3,5 @@ description: Enumerate local accounts
 runner: script
 command: cat /etc/passwd ; getent passwd ; getent group
 expect:
-  engine: wazuh
-  rule_id: "100511"
+  engine: falco
+  rule: DLL Discovery Commands

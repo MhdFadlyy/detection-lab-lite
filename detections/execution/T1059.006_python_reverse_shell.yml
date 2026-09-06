@@ -22,6 +22,6 @@ falsepositives:
   - Developer one-liners and test harnesses
 level: high
 dll:
-  wazuh_native: true
-  wazuh_rule_id: "100211"
+  engine: falco
+  falco_rule: DLL Reverse Shell
   scenario: T1059.006_python_reverse_shell

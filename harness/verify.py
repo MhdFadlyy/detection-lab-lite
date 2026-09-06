@@ -9,35 +9,53 @@ from __future__ import annotations
 import sys
 import time
 
-from common import Scenario, query_wazuh_alert
+from common import (
+    Scenario,
+    count_wazuh_alerts,
+    query_falco_alert,
+    query_wazuh_alert,
+)
 
 
-def verify_one(tid: str) -> bool:
-    sc = Scenario.load(tid)
+def _since(sc: Scenario) -> float:
     marker = sc.path.parent / ".last-run"
-    since = time.time() - 600
     if marker.exists():
         try:
-            since = float(marker.read_text().split()[1])
+            return float(marker.read_text().split()[1])
         except (IndexError, ValueError):
             pass
+    return time.time() - 600
 
-    if sc.expect_engine != "wazuh":
-        print(f"[verify] {tid}: engine '{sc.expect_engine}' not wired yet — SKIP")
-        return True
 
-    hit = query_wazuh_alert(sc.expect_rule, since)
+def verify_one(tid: str, timeout: int = 60) -> bool:
+    sc = Scenario.load(tid)
+    since = _since(sc)
+
+    if sc.expect_engine == "falco":
+        hit = query_falco_alert(sc.expect_rule, since, timeout)
+        if hit:
+            print(f"[verify] {tid}: PASS — falco rule '{sc.expect_rule}'")
+            return True
+        print(f"[verify] {tid}: FAIL — no Falco event for rule '{sc.expect_rule}'")
+        return False
+
+    hit = query_wazuh_alert(sc.expect_rule, since, timeout)
     if hit:
-        print(f"[verify] {tid}: PASS — rule {sc.expect_rule} "
+        print(f"[verify] {tid}: PASS — wazuh rule {sc.expect_rule} "
               f"({hit.get('rule', {}).get('description', '?')})")
         return True
-    print(f"[verify] {tid}: FAIL — no alert for rule {sc.expect_rule}")
+    total = count_wazuh_alerts(since)
+    print(f"[verify] {tid}: FAIL — no alert for rule {sc.expect_rule} "
+          f"({total} total alerts since the run)")
     return False
 
 
 def main(argv: list[str]) -> int:
     if argv and argv[0] == "--all":
-        results = {p.stem: verify_one(p.stem.split("_")[0]) for p in Scenario.all()}
+        # attacks already ran; give the pipelines one settle window, then poll each briefly
+        time.sleep(20)
+        results = {p.stem: verify_one(p.stem.split("_")[0], timeout=25)
+                   for p in Scenario.all()}
         failed = [k for k, ok in results.items() if not ok]
         print(f"\n[verify] {len(results) - len(failed)}/{len(results)} passed")
         return 1 if failed else 0

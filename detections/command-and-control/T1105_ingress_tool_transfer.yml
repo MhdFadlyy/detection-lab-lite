@@ -21,6 +21,6 @@ falsepositives:
   - Package managers, update scripts, health checks
 level: medium
 dll:
-  wazuh_native: true
-  wazuh_rule_id: "100711"
+  engine: falco
+  falco_rule: DLL Ingress Tool Transfer
   scenario: T1105_ingress_tool_transfer

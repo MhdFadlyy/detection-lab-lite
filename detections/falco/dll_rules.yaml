@@ -1,0 +1,78 @@
+# detection-lab-lite custom Falco rules.
+# Loaded from /etc/falco/rules.d/ (mounted from detections/falco/).
+# Each rule name is what a scenario's `expect.rule` matches.
+
+- rule: DLL Reverse Shell
+  desc: A shell process redirecting I/O to a network socket (bash/python reverse shell).
+  condition: >
+    spawned_process and
+    (
+      (proc.name in (bash, sh, dash, ksh, zsh) and
+        (proc.cmdline contains "/dev/tcp/" or proc.cmdline contains "/dev/udp/"))
+      or
+      (proc.name in (python, python2, python3) and
+        proc.cmdline contains "socket" and
+        (proc.cmdline contains "subprocess" or proc.cmdline contains "pty" or proc.cmdline contains "/bin/sh"))
+    )
+  output: >
+    Reverse shell spawned (user=%user.name proc=%proc.name cmdline=%proc.cmdline
+    parent=%proc.pname container=%container.name)
+  priority: CRITICAL
+  tags: [execution, mitre_execution, T1059.004, T1059.006]
+
+- rule: DLL Sensitive File Read
+  desc: A file-reading utility opening /etc/shadow or /etc/sudoers.
+  condition: >
+    open_read and
+    fd.name in (/etc/shadow, /etc/sudoers) and
+    proc.name in (cat, cp, head, tail, less, more, base64, xxd, dd, vi, vim, nano, python, python3, perl)
+  output: >
+    Sensitive credential file read (file=%fd.name proc=%proc.name cmdline=%proc.cmdline
+    user=%user.name container=%container.name)
+  priority: CRITICAL
+  tags: [credential_access, mitre_credential_access, T1003.008]
+
+- rule: DLL Credential Search
+  desc: Recursive grep across the filesystem for credential-like strings.
+  condition: >
+    spawned_process and
+    proc.name in (grep, egrep, fgrep, rg, ag) and
+    (proc.cmdline contains "password" or proc.cmdline contains "passwd" or
+     proc.cmdline contains "secret" or proc.cmdline contains "api_key" or
+     proc.cmdline contains "apikey" or proc.cmdline contains "token")
+  output: >
+    Filesystem search for secrets (proc=%proc.name cmdline=%proc.cmdline
+    user=%user.name container=%container.name)
+  priority: WARNING
+  tags: [credential_access, mitre_credential_access, T1552.001]
+
+- rule: DLL Discovery Commands
+  desc: Account and context discovery utilities (whoami/id/getent).
+  condition: >
+    spawned_process and proc.name in (whoami, id, getent, groups)
+  output: >
+    Discovery command executed (proc=%proc.name cmdline=%proc.cmdline
+    user=%user.name parent=%proc.pname container=%container.name)
+  priority: NOTICE
+  tags: [discovery, mitre_discovery, T1033, T1087.001]
+
+- rule: DLL Outbound SSH
+  desc: SSH client execution from a workload — possible lateral movement.
+  condition: >
+    spawned_process and proc.name in (ssh, sshpass, scp, sftp)
+  output: >
+    Outbound SSH client (proc=%proc.name cmdline=%proc.cmdline user=%user.name
+    container=%container.name)
+  priority: NOTICE
+  tags: [lateral_movement, mitre_lateral_movement, T1021.004]
+
+- rule: DLL Ingress Tool Transfer
+  desc: curl/wget fetching a remote URL — ingress tool transfer.
+  condition: >
+    spawned_process and proc.name in (curl, wget) and
+    (proc.cmdline contains "http://" or proc.cmdline contains "https://" or proc.cmdline contains "ftp://")
+  output: >
+    File download via %proc.name (cmdline=%proc.cmdline user=%user.name
+    container=%container.name)
+  priority: WARNING
+  tags: [command_and_control, mitre_command_and_control, T1105, T1071.001]

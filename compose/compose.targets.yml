@@ -3,9 +3,8 @@ services:
     build: ${DLL_ROOT}/compose/target-linux
     container_name: dll-target-linux
     hostname: target-linux
-    cap_add: [SYS_ADMIN, SYS_PTRACE, AUDIT_CONTROL, AUDIT_READ]
-    security_opt: ["seccomp:unconfined", "apparmor:unconfined"]
-    # The victim. Attacks land here; the Wazuh agent + auditd ship telemetry.
+    # The victim. Attacks land here; the Wazuh agent ships FIM telemetry.
+    # Process/syscall activity is observed by Falco from the host kernel.
     volumes:
       - ${DLL_ROOT}/attacks:/opt/attacks:ro
     environment:

