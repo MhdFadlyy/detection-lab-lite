@@ -28,5 +28,6 @@ falsepositives:
 level: high
 # --- detection-lab-lite metadata ---
 dll:
-  wazuh_rule_id: "100210"      # hand-written rule in detections/wazuh-native/ (see caveat)
+  wazuh_native: true           # firing rule is hand-written (detections/wazuh-native/); see README caveat
+  wazuh_rule_id: "100210"
   scenario: T1059.004_bash_reverse_shell

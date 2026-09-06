@@ -1,0 +1,27 @@
+title: Python inline socket/subprocess execution
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000211
+status: experimental
+description: Detects python invoked with -c importing socket/subprocess/pty — the classic python reverse shell one-liner.
+references:
+  - https://gtfobins.github.io/gtfobins/python/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.execution, attack.t1059.006]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: ['/python', '/python2', '/python3']
+    CommandLine|contains:
+      - 'import socket'
+      - 'import subprocess'
+      - 'import pty'
+  condition: selection
+falsepositives:
+  - Developer one-liners and test harnesses
+level: high
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100211"
+  scenario: T1059.006_python_reverse_shell

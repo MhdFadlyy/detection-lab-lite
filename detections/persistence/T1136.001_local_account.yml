@@ -1,0 +1,23 @@
+title: Local account created
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000313
+status: experimental
+description: Detects useradd/adduser execution — attacker creating a local account for persistence.
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.persistence, attack.t1136.001]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: ['/useradd', '/adduser']
+  condition: selection
+falsepositives:
+  - Provisioning scripts, package post-install hooks
+level: medium
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100313"
+  scenario: T1136.001_local_account

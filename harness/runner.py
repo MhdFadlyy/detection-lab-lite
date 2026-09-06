@@ -20,10 +20,14 @@ def main(argv: list[str]) -> int:
     print(f"[runner] ({sc.runner}) {sc.command}")
 
     started = time.time()
-    cp = target_exec(sc.command)
-    print(cp.stdout.strip())
-    if cp.stderr.strip():
-        print(cp.stderr.strip(), file=sys.stderr)
+    if sc.runner == "atomic":
+        import atomic
+        atomic.run(sc.command)  # command holds the technique id for atomic scenarios
+    else:
+        cp = target_exec(sc.command)
+        print(cp.stdout.strip())
+        if cp.stderr.strip():
+            print(cp.stderr.strip(), file=sys.stderr)
 
     # stash the run marker so `verify` only looks at alerts after this point
     (sc.path.parent / ".last-run").write_text(f"{sc.tid} {started}\n")

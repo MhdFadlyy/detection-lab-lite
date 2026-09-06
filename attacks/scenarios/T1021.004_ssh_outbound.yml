@@ -1,0 +1,8 @@
+technique: T1021.004
+description: Attempt an outbound SSH connection (fails fast, still executes the client)
+runner: script
+command: |
+  timeout 5 ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 -o BatchMode=yes dll@127.0.0.1 id || true
+expect:
+  engine: wazuh
+  rule_id: "100610"

@@ -1,0 +1,7 @@
+technique: T1033
+description: Run whoami and id (post-exploitation orientation)
+runner: script
+command: whoami ; id ; id -un
+expect:
+  engine: wazuh
+  rule_id: "100510"

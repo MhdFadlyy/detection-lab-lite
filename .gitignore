@@ -1,6 +1,7 @@
 .env
 .wazuh-docker/
 attacks/scenarios/.last-run
+detections/generated/
 docs/navigator-layer.json
 __pycache__/
 *.pyc

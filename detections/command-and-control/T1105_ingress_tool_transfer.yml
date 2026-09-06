@@ -1,0 +1,26 @@
+title: File download via curl/wget
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000710
+status: experimental
+description: Detects curl/wget fetching a URL, especially to a temp or shared-memory path — ingress tool transfer.
+references:
+  - https://attack.mitre.org/techniques/T1105/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.command_and_control, attack.t1105, attack.t1071.001]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: ['/curl', '/wget']
+    CommandLine|contains: ['http://', 'https://', 'ftp://']
+  selection_path:
+    CommandLine|contains: [' -o ', ' -O ', '--output', '/tmp/', '/dev/shm/']
+  condition: selection and selection_path
+falsepositives:
+  - Package managers, update scripts, health checks
+level: medium
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100711"
+  scenario: T1105_ingress_tool_transfer

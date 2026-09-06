@@ -1,0 +1,9 @@
+technique: T1053.003
+description: Install a cron job via crontab, then remove it
+runner: script
+command: |
+  (crontab -l 2>/dev/null; echo "* * * * * /usr/bin/id > /tmp/dll_cron") | crontab - ;
+  crontab -l ; crontab -r || true
+expect:
+  engine: wazuh
+  rule_id: "100310"

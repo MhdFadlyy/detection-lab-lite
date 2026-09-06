@@ -1,0 +1,23 @@
+title: SSH authorized_keys modified
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000312
+status: experimental
+description: Detects writes to an authorized_keys file — attacker adding an SSH key for persistent access.
+references:
+  - https://attack.mitre.org/techniques/T1098/004/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.persistence, attack.lateral_movement, attack.t1098.004]
+logsource:
+  product: linux
+  category: file_event
+detection:
+  selection:
+    TargetFilename|endswith: 'authorized_keys'
+  condition: selection
+falsepositives:
+  - Legitimate key rotation by configuration management or the user
+level: high
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100312"
+  scenario: T1098.004_authorized_keys

@@ -1,0 +1,7 @@
+technique: T1087.001
+description: Enumerate local accounts
+runner: script
+command: cat /etc/passwd ; getent passwd ; getent group
+expect:
+  engine: wazuh
+  rule_id: "100511"

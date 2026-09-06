@@ -1,0 +1,23 @@
+title: Crontab modified via CLI
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000310
+status: experimental
+description: Detects use of the crontab binary to install a scheduled task — a common persistence mechanism.
+references:
+  - https://attack.mitre.org/techniques/T1053/003/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.persistence, attack.t1053.003]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '/crontab'
+  condition: selection
+falsepositives:
+  - Configuration management (Ansible, Puppet) installing legitimate jobs
+level: medium
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100310"
+  scenario: T1053.003_cron_persistence

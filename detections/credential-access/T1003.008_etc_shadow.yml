@@ -1,0 +1,24 @@
+title: /etc/shadow read or copied
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000410
+status: experimental
+description: Detects a process reading or copying /etc/shadow — offline credential dumping.
+references:
+  - https://attack.mitre.org/techniques/T1003/008/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.credential_access, attack.t1003.008]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: ['/cat', '/cp', '/head', '/tail', '/less', '/more', '/xxd', '/base64']
+    CommandLine|contains: '/etc/shadow'
+  condition: selection
+falsepositives:
+  - Backup jobs, security scanners (rare, usually allowlisted)
+level: high
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100410"
+  scenario: T1003.008_etc_shadow

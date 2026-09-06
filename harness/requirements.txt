@@ -1,4 +1,5 @@
 requests>=2.31
 PyYAML>=6.0
+# Sigma tooling. The Wazuh backend is installed as a sigma-cli plugin:
+#   sigma plugin install wazuh
 sigma-cli>=1.0
-pySigma-backend-opensearch>=1.0

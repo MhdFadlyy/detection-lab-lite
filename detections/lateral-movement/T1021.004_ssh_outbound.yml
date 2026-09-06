@@ -1,0 +1,23 @@
+title: Outbound SSH client execution
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000610
+status: experimental
+description: Detects execution of the ssh/sshpass client from a server workload — possible lateral movement.
+references:
+  - https://attack.mitre.org/techniques/T1021/004/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.lateral_movement, attack.t1021.004]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: ['/ssh', '/sshpass']
+  condition: selection
+falsepositives:
+  - Admin jump-host workflows, CI deploy steps, git-over-ssh
+level: low
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100610"
+  scenario: T1021.004_ssh_outbound

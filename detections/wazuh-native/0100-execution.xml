@@ -1,19 +1,27 @@
-<!--
-  Hand-written Wazuh rules for detections that pySigma-backend cannot express cleanly
-  (see README "Sigma caveat"). IDs in the 100200-100999 range.
-  These match auditd execve events decoded by Wazuh's built-in audit ruleset (rule 80700+).
--->
+<!-- Execution (T1059.*) -->
 <group name="detection-lab-lite,linux,execution,">
 
   <rule id="100210" level="12">
-    <if_group>audit</if_group>
-    <field name="audit.command">bash</field>
-    <match>/dev/tcp/</match>
+    <if_sid>100200</if_sid>
+    <match>/dev/tcp/|/dev/udp/</match>
     <description>Bash reverse shell via /dev/tcp (T1059.004)</description>
-    <mitre>
-      <id>T1059.004</id>
-      <id>T1071</id>
-    </mitre>
+    <mitre><id>T1059.004</id><id>T1071</id></mitre>
+  </rule>
+
+  <rule id="100211" level="12">
+    <if_sid>100200</if_sid>
+    <field name="audit.command">python3|python|python2</field>
+    <match>import socket|import subprocess|import pty</match>
+    <description>Python inline socket/subprocess execution — possible reverse shell (T1059.006)</description>
+    <mitre><id>T1059.006</id></mitre>
+  </rule>
+
+  <rule id="100212" level="8">
+    <if_sid>100200</if_sid>
+    <field name="audit.command">nc|ncat|netcat</field>
+    <match> -e | -c |-l</match>
+    <description>Netcat exec/listen — possible bind or reverse shell (T1059.004)</description>
+    <mitre><id>T1059.004</id></mitre>
   </rule>
 
 </group>

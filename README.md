@@ -64,8 +64,11 @@ naive conversions match too broadly. This project:
 
 ## Status
 
-Week 1 scaffold: stack + `lab` CLI + one worked detection (`T1059.004`). See the
-[project plan](docs/plan.md) and `CONTRIBUTING.md` for the roadmap.
+Week 2: harness complete (`runner` / `verify` / `report` / `sigma_build` / Atomic Red Team
+wrapper) and **12 detections across 6 ATT&CK tactics**, each with a self-contained attack
+scenario. Run `./lab up` once, then `./lab test` to replay every scenario and assert the
+alerts. See [coverage](docs/coverage.md), the [project plan](docs/plan.md), and
+`CONTRIBUTING.md` for the roadmap.
 
 ## License
 

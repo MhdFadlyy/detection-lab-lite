@@ -26,7 +26,7 @@
 ## Roadmap
 
 - [x] Week 1 — stack + `lab` CLI + first detection
-- [ ] Week 2 — harness (`sigma_build`, Atomic Red Team wrapper), 15–20 detections
-- [ ] Week 3 — CI full replay, Navigator layer, Grafana dashboard, Falco scenarios
+- [x] Week 2 — harness (`sigma_build`, Atomic Red Team wrapper), 12 detections across 6 tactics
+- [ ] Week 3 — CI full replay green, Navigator layer, Grafana dashboard, Falco scenarios
 - [ ] Week 4 — mkdocs site + Pages, demo GIF, `v0.1.0`
 - [ ] Later — Windows/Sysmon target, Caldera integration

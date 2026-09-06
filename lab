@@ -72,6 +72,17 @@ cmd_logs() { _require_bootstrap; docker compose "${COMPOSE_ARGS[@]}" logs -f "$@
 cmd_attack()  { exec python3 harness/runner.py "$@"; }
 cmd_verify()  { exec python3 harness/verify.py "$@"; }
 cmd_report()  { exec python3 harness/report.py "$@"; }
+cmd_sigma()   { exec python3 harness/sigma_build.py "$@"; }
+
+cmd_test() {
+  # replay every scenario, then assert every expected alert (local end-to-end check)
+  local s tid
+  for s in attacks/scenarios/*.yml; do
+    tid=$(basename "$s" .yml); tid=${tid%%_*}
+    python3 harness/runner.py "$tid" || true
+  done
+  python3 harness/verify.py --all
+}
 
 usage() {
   cat <<'EOF'
@@ -84,7 +95,9 @@ detection-lab-lite
   ./lab logs [svc...]    follow logs
   ./lab pull             pull images, one at a time
   ./lab attack <TID>     run an attack scenario against target-linux
-  ./lab verify <TID>     assert the expected alert fired
+  ./lab verify <TID>     assert the expected alert fired (--all for every scenario)
+  ./lab test             replay every scenario then verify --all (local end-to-end)
+  ./lab sigma [--check]  convert detections/*.yml -> Wazuh rules
   ./lab report           regenerate ATT&CK coverage matrix + navigator layer
 EOF
 }
@@ -101,6 +114,8 @@ main() {
     attack)    cmd_attack "$@" ;;
     verify)    cmd_verify "$@" ;;
     report)    cmd_report "$@" ;;
+    sigma)     cmd_sigma "$@" ;;
+    test)      cmd_test "$@" ;;
     help|-h|--help) usage ;;
     *) usage; exit 1 ;;
   esac

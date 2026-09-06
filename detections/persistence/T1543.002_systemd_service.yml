@@ -1,0 +1,24 @@
+title: systemd unit file created or modified
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000311
+status: experimental
+description: Detects creation or modification of a unit file under /etc/systemd/system — service persistence.
+references:
+  - https://attack.mitre.org/techniques/T1543/002/
+author: detection-lab-lite
+date: 2026-09-06
+tags: [attack.persistence, attack.privilege_escalation, attack.t1543.002]
+logsource:
+  product: linux
+  category: file_event
+detection:
+  selection:
+    TargetFilename|startswith: '/etc/systemd/system/'
+    TargetFilename|endswith: '.service'
+  condition: selection
+falsepositives:
+  - Package installation, configuration management
+level: medium
+dll:
+  wazuh_native: true
+  wazuh_rule_id: "100311"
+  scenario: T1543.002_systemd_service
