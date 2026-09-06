@@ -53,8 +53,8 @@ def verify_one(tid: str, timeout: int = 60) -> bool:
 def main(argv: list[str]) -> int:
     if argv and argv[0] == "--all":
         # attacks already ran; give the pipelines one settle window, then poll each briefly
-        time.sleep(20)
-        results = {p.stem: verify_one(p.stem.split("_")[0], timeout=25)
+        time.sleep(30)
+        results = {p.stem: verify_one(p.stem.split("_")[0], timeout=40)
                    for p in Scenario.all()}
         failed = [k for k, ok in results.items() if not ok]
         print(f"\n[verify] {len(results) - len(failed)}/{len(results)} passed")

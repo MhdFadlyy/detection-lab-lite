@@ -77,9 +77,22 @@ cmd_verify()  { exec python3 harness/verify.py "$@"; }
 cmd_report()  { exec python3 harness/report.py "$@"; }
 cmd_sigma()   { exec python3 harness/sigma_build.py "$@"; }
 
+cmd_wait_agent() {
+  log "waiting for the target-linux agent to become active (up to 180s)"
+  for i in $(seq 1 36); do
+    if docker compose "${COMPOSE_ARGS[@]}" exec -T wazuh.manager \
+         /var/ossec/bin/agent_control -l 2>/dev/null | grep -qiE 'target-linux.*Active'; then
+      log "agent active"; return 0
+    fi
+    sleep 5
+  done
+  log "agent still not active — continuing anyway"
+}
+
 cmd_test() {
   # replay every scenario, then assert every expected alert (local end-to-end check)
   local s tid
+  cmd_wait_agent
   for s in attacks/scenarios/*.yml; do
     tid=$(basename "$s" .yml); tid=${tid%%_*}
     python3 harness/runner.py "$tid" || true

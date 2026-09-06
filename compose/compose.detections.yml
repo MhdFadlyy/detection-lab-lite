@@ -18,6 +18,9 @@ services:
     container_name: dll-falco
     privileged: true            # runtime syscall visibility on the host kernel
     pid: host
+    cap_add: [SYS_RESOURCE, BPF, PERFMON, SYS_PTRACE]
+    ulimits:
+      memlock: -1               # modern eBPF ring buffers need unbounded locked memory
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
       - /proc:/host/proc:ro
