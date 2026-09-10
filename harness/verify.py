@@ -27,19 +27,19 @@ def _since(sc: Scenario) -> float:
     return time.time() - 600
 
 
-def verify_one(tid: str, timeout: int = 60) -> bool:
+def verify_one(tid: str, falco_timeout: int = 40, wazuh_timeout: int = 90) -> bool:
     sc = Scenario.load(tid)
     since = _since(sc)
 
     if sc.expect_engine == "falco":
-        hit = query_falco_alert(sc.expect_rule, since, timeout)
+        hit = query_falco_alert(sc.expect_rule, since, falco_timeout)
         if hit:
             print(f"[verify] {tid}: PASS — falco rule '{sc.expect_rule}'")
             return True
         print(f"[verify] {tid}: FAIL — no Falco event for rule '{sc.expect_rule}'")
         return False
 
-    hit = query_wazuh_alert(sc.expect_rule, since, timeout)
+    hit = query_wazuh_alert(sc.expect_rule, since, wazuh_timeout)
     if hit:
         print(f"[verify] {tid}: PASS — wazuh rule {sc.expect_rule} "
               f"({hit.get('rule', {}).get('description', '?')})")
@@ -52,9 +52,9 @@ def verify_one(tid: str, timeout: int = 60) -> bool:
 
 def main(argv: list[str]) -> int:
     if argv and argv[0] == "--all":
-        # attacks already ran; give the pipelines one settle window, then poll each briefly
-        time.sleep(30)
-        results = {p.stem: verify_one(p.stem.split("_")[0], timeout=40)
+        # attacks already ran; let the pipelines settle, then poll each (returns on hit)
+        time.sleep(20)
+        results = {p.stem: verify_one(p.stem.split("_")[0])
                    for p in Scenario.all()}
         failed = [k for k, ok in results.items() if not ok]
         print(f"\n[verify] {len(results) - len(failed)}/{len(results)} passed")

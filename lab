@@ -77,22 +77,37 @@ cmd_verify()  { exec python3 harness/verify.py "$@"; }
 cmd_report()  { exec python3 harness/report.py "$@"; }
 cmd_sigma()   { exec python3 harness/sigma_build.py "$@"; }
 
-cmd_wait_agent() {
+_idx() { docker compose "${COMPOSE_ARGS[@]}" exec -T wazuh.indexer \
+  curl -sk -u "admin:${INDEXER_PASSWORD:-SecretPassword}" \
+  -H 'Content-Type: application/json' "https://localhost:9200/$1" "${@:2}"; }
+
+cmd_wait_ready() {
   log "waiting for the target-linux agent to become active (up to 180s)"
-  for i in $(seq 1 36); do
-    if docker compose "${COMPOSE_ARGS[@]}" exec -T wazuh.manager \
-         /var/ossec/bin/agent_control -l 2>/dev/null | grep -qiE 'target-linux.*Active'; then
-      log "agent active"; return 0
+  for _ in $(seq 1 36); do
+    docker compose "${COMPOSE_ARGS[@]}" exec -T wazuh.manager \
+      /var/ossec/bin/agent_control -l 2>/dev/null | grep -qiE 'target-linux.*Active' && break
+    sleep 5
+  done
+
+  # canary: touch a watched file and wait until its FIM alert reaches the indexer,
+  # proving the whole agent -> manager -> filebeat -> indexer path is hot.
+  log "warming up the detection pipeline (FIM canary, up to 240s)"
+  docker compose "${COMPOSE_ARGS[@]}" exec -T target-linux \
+    sh -c 'mkdir -p /etc/cron.d && echo "# dll canary $(date +%s)" > /etc/cron.d/dll-canary' 2>/dev/null
+  for _ in $(seq 1 48); do
+    if _idx 'wazuh-alerts-*/_count' -d '{"query":{"wildcard":{"syscheck.path":"*dll-canary*"}}}' \
+         2>/dev/null | grep -qE '"count":[1-9]'; then
+      log "pipeline hot"; return 0
     fi
     sleep 5
   done
-  log "agent still not active — continuing anyway"
+  log "canary alert never arrived — continuing anyway (FIM checks may be flaky)"
 }
 
 cmd_test() {
   # replay every scenario, then assert every expected alert (local end-to-end check)
   local s tid
-  cmd_wait_agent
+  cmd_wait_ready
   for s in attacks/scenarios/*.yml; do
     tid=$(basename "$s" .yml); tid=${tid%%_*}
     python3 harness/runner.py "$tid" || true

@@ -1,7 +1,9 @@
 technique: T1136.001
 description: Create a local account with useradd (persistence — not reverted; ./lab down clears it)
 runner: script
+# idempotent: remove any leftover from a previous run so useradd always modifies /etc/passwd
 command: |
+  userdel -rf dll_backdoor 2>/dev/null || true
   useradd -m -s /bin/bash dll_backdoor
   id dll_backdoor
 expect:
