@@ -157,9 +157,9 @@ def build_layer(dets, tested) -> dict:
 def _how_it_fires(d: dict) -> str:
     if d["engine"] == "falco":
         r = d["rule"]
-        stock = not str(r).startswith("DLL ")
-        src = ("a Falco stock rule" if stock
-               else f"the custom rule in [`detections/falco/dll_rules.yaml`]({REPO}/blob/main/detections/falco/dll_rules.yaml)")
+        rules_yaml = f"{REPO}/blob/main/detections/falco/dll_rules.yaml"
+        src = ("a Falco stock rule" if not str(r).startswith("DLL ")
+               else f"the custom rule in [`detections/falco/dll_rules.yaml`]({rules_yaml})")
         return (f"Falco (eBPF, host syscalls) raises **`{r}`** from {src}. Falco writes its "
                 f"JSON events to a shared volume; the `target-linux` Wazuh agent tails that "
                 f"file, so the alert lands in the Wazuh indexer as a `1009xx` rule "
@@ -187,11 +187,11 @@ def write_detection_pages(dets, scenarios, tested):
         md = [
             f"# {tid} — {d['title']}", "",
             "| | |", "|---|---|",
-            f"| **ATT&CK** | " + ", ".join(f"[{t}]({attack_url(t)})" for t in d["tids"]) + " |",
+            "| **ATT&CK** | " + ", ".join(f"[{t}]({attack_url(t)})" for t in d["tids"]) + " |",
             f"| **Tactic** | {', '.join(d['tactics'])} |",
             f"| **Severity** | {d['level']} |",
             f"| **Engine** | {engine_cell} |",
-            f"| **Automated test** | " + ("✅ attack replayed + alert asserted in CI"
+            "| **Automated test** | " + ("✅ attack replayed + alert asserted in CI"
                                           if is_tested else "— not yet") + " |",
             "",
             "## What it detects", "",
@@ -217,7 +217,7 @@ def write_detection_pages(dets, scenarios, tested):
             md += ["## References", ""]
             md += [f"- <{ref}>" for ref in doc["references"]]
             md += [""]
-        md += [f"---", "",
+        md += ["---", "",
                f"*Source: [`{d['path']}`]({REPO}/blob/main/{d['path']})*", ""]
         (DET_DOCS / f"{d['stem']}.md").write_text("\n".join(md))
 
