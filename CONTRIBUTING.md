@@ -33,10 +33,11 @@ Capability stages, ordered by dependency — not a schedule. This is a long-live
 detections keep being added regardless of which stage is "current".
 
 - [x] **Stage 1 — Foundation** — stack + `lab` CLI + first detection + public repo
-- [~] **Stage 2 — Detection library** — harness (`sigma_build`, Atomic Red Team wrapper) +
-  detections across the ATT&CK tactics, each with a self-contained scenario *(ongoing)*
-- [ ] **Stage 3 — Continuous validation** — CI boots the stack headless and `./lab test` goes
-  green; ATT&CK Navigator layer; Falco 2nd engine + scenarios; OpenCanary; Grafana dashboard
+- [x] **Stage 2 — Detection library** — harness + 12 detections across 6 tactics, each with a
+  self-contained scenario; `./lab test` = 12/12 on a real Linux host. *(Keep adding detections.)*
+- [~] **Stage 3 — Continuous validation** — make the CI `./lab test` replay reliably green
+  (currently advisory); ATT&CK Navigator layer artifact; more Falco scenarios; OpenCanary;
+  provisioned Grafana "SOC overview" dashboard
 - [ ] **Stage 4 — Polish & first release** — mkdocs site content, demo GIF, README screenshots,
   issue/PR templates, tag `v0.1.0`, writeup
 - [ ] **Ongoing** — Windows + Sysmon target, Caldera, scheduled feed updates, community PRs

@@ -36,8 +36,30 @@ with `pid: host`. See `SECURITY.md`.
 | File | Services |
 |---|---|
 | `.wazuh-docker/single-node/docker-compose.yml` | wazuh.manager, wazuh.indexer, wazuh.dashboard (upstream, cloned) |
-| `compose/compose.overlay.yml` | heap tuning + manager config + shared log volumes |
+| `compose/compose.overlay.yml` | indexer heap tuning + drop custom rules into `etc/rules` |
 | `compose/compose.detections.yml` | suricata, falco |
 | `compose/compose.honeypots.yml` | cowrie, opencanary |
 | `compose/compose.targets.yml` | target-linux |
 | `compose/compose.viz.yml` | grafana |
+
+## Running & verifying
+
+```
+./lab bootstrap     # once: clone wazuh-docker + generate indexer certs
+./lab up            # pull (sequential) + build + start all 8 containers
+./lab test          # wait for the agent + FIM pipeline, replay every scenario, assert alerts
+./lab down -v       # tear down and wipe volumes
+```
+
+`./lab test` first runs `wait_ready`: it waits for the `target-linux` agent to report
+**Active**, then rewrites a canary file under `/etc/cron.d/` until its FIM alert reaches the
+indexer — proving the whole `agent → manager → filebeat → indexer` path is hot. A fresh boot
+otherwise absorbs the first file changes into the FIM baseline before real-time monitoring is
+ready, so early scenarios would silently miss.
+
+Then each `attacks/scenarios/*.yml` is replayed inside `target-linux` and `verify.py` polls
+the matching engine (Falco events file, or the Wazuh indexer) for the expected alert.
+
+**CI note:** the same `./lab test` runs in GitHub Actions but is advisory — hosted runners
+are unreliable for eBPF probe loading and a full SIEM boot. The authoritative 12/12 is a
+local run on a real Linux host (Falco needs kernel ≥ 5.8; 0.44.x for kernels ≥ 6.x).

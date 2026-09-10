@@ -56,22 +56,30 @@ declares which engine verifies it.
 - Docker Engine 24+ and Compose v2
 - ~8 GB RAM free, ~15 GB disk
 
-## Sigma caveat
+## How detections are defined
 
-`pySigma-backend-wazuh` maps to standard Wazuh field names and does not emit `if_sid`, so
-naive conversions match too broadly. This project:
+Each detection is a **Sigma rule** in `detections/<tactic>/` — the portable, human-readable
+intent. Its `dll:` block says which engine actually verifies it:
 
-1. post-processes converted rules with a project pySigma pipeline (`harness/sigma_build.py`),
-2. asserts on **fired alerts** in CI, not on converted text, and
-3. keeps a `detections/wazuh-native/` escape hatch for detections Sigma can't express cleanly
-   (the Sigma file then stays as documentation, flagged under `dll:`).
+- **`engine: wazuh`** → a hand-written Wazuh FIM rule in `detections/wazuh-native/`
+  (`<if_group>syscheck</if_group>`). `verify.py` queries the indexer for `rule.id`.
+- **`engine: falco`** → a rule in `detections/falco/dll_rules.yaml` (or a Falco stock rule).
+  `verify.py` reads `/tmp/falco_events.json` in the Falco container for the rule name.
+
+Sigma-to-Wazuh auto-conversion (`harness/sigma_build.py`, `pySigma-backend-wazuh`) runs in CI
+as a **portability check only** — its backend maps to stock field names and omits `if_sid`,
+so the rules that actually fire are the hand-written ones above.
 
 ## Status
 
-**Stage 2 — Detection library** (ongoing). Harness is complete (`runner` / `verify` / `report`
-/ `sigma_build` / Atomic Red Team wrapper) and there are **12 detections across 6 ATT&CK
-tactics**, each with a self-contained attack scenario. Run `./lab up` once, then `./lab test`
-to replay every scenario and assert the alerts.
+**Stage 2 — Detection library.** Harness complete (`runner` / `verify` / `report` /
+`sigma_build` / Atomic Red Team wrapper). **12 detections across 6 ATT&CK tactics**, each
+with a self-contained scenario — `./lab up && ./lab test` replays every attack and asserts
+the alert fires. **12/12 green** on a real Linux host (Docker Engine on a modern kernel).
+
+CI (`.github/workflows/ci.yml`) runs lint + `sigma check` + `compose config` on every push;
+the full `./lab test` replay also runs there but is **advisory** — GitHub Actions runners
+can be flaky for eBPF (Falco) and a full SIEM boot, so the authoritative gate is a local run.
 
 This is a long-lived project with no deadline — see [coverage](docs/coverage.md), the
 [project plan](docs/plan.md), and `CONTRIBUTING.md` for the capability-stage roadmap.

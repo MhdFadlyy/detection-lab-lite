@@ -17,10 +17,11 @@ jobs:
       - run: python3 harness/sigma_build.py --check   # portability signal; non-blocking on backend gaps
 
   replay:
-    runs-on: ubuntu-latest        # 16 GB / 4 vCPU — fits the tuned stack
+    runs-on: ubuntu-latest        # 16 GB / 4 vCPU
     needs: lint
-    # Informational until Stage 3 hardens the headless Wazuh boot. Local
-    # `./lab up && ./lab test` is the current gate. Does not fail the workflow.
+    # Advisory. `./lab test` is green (12/12) on a real Linux host; GitHub-hosted
+    # runners are unreliable for eBPF (Falco) and a full SIEM boot, so a failure
+    # here does not fail the workflow. Stage 3 = make this reliably green.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -52,9 +53,6 @@ jobs:
           echo "::group::target-linux agent"
           docker exec dll-target-linux /var/ossec/bin/wazuh-control status
           docker exec dll-target-linux sh -c 'tail -n 120 /var/ossec/logs/ossec.log'
-          echo "::endgroup::"
-          echo "::group::auditd in target"
-          docker exec dll-target-linux sh -c 'command -v auditctl && auditctl -s; ls -l /var/log/audit 2>&1'
           echo "::endgroup::"
           echo "::group::falco"
           docker logs --tail 120 dll-falco 2>&1
