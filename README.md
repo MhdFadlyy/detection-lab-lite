@@ -15,9 +15,14 @@ asserting the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix
 ```
 
-| `./lab test` replays every attack and asserts every alert — 15/15, locally and in CI | Wazuh catching the persistence scenarios, ATT&CK-tagged |
+| `./lab test` — replay every attack, assert every alert (15/15, local + CI) | Wazuh Threat Hunting — MITRE breakdown of what the replay tripped |
 |---|---|
-| ![CI green](docs/img/ci-green.jpg) | ![Wazuh FIM detections](docs/img/wazuh-fim-detections.jpg) |
+| ![CI green](docs/img/ci-green.jpg) | ![Wazuh Threat Hunting](docs/img/wazuh-threat-hunting.jpg) |
+
+Both engines land in one alert store — here the FIM (`1003xx`) and Falco (`1009xx`) rules
+side by side in the Wazuh event stream:
+
+![Wazuh events — FIM + Falco detections](docs/img/wazuh-detections.jpg)
 
 📊 **[Coverage in the MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)** — auto-generated from the detections + CI results ([layer JSON](https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)).
 
