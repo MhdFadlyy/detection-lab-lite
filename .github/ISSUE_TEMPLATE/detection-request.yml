@@ -1,0 +1,42 @@
+name: Detection request
+description: Propose a new detection (technique to catch)
+title: "detection: T#### — <short name>"
+labels: ["detection"]
+body:
+  - type: input
+    id: technique
+    attributes:
+      label: ATT&CK technique
+      description: ID + name, e.g. T1053.005 — Scheduled Task/Job — at
+      placeholder: T1053.005 — at
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: What the technique does and why a Linux SOC should catch it.
+    validations:
+      required: true
+  - type: textarea
+    id: telemetry
+    attributes:
+      label: Telemetry / log source
+      description: >
+        What signal exposes it — a file change (Wazuh FIM), a process exec or
+        syscall (Falco), a network event (Suricata), a honeypot hit. Note if the
+        signal is container-capable (auditd is not).
+    validations:
+      required: true
+  - type: textarea
+    id: logic
+    attributes:
+      label: Proposed detection logic
+      description: Rough Sigma-style selection, or a Falco condition.
+      render: yaml
+  - type: textarea
+    id: refs
+    attributes:
+      label: References
+      placeholder: |
+        - https://attack.mitre.org/techniques/T1053/005/

@@ -85,19 +85,25 @@ Sigma-to-Wazuh auto-conversion (`harness/sigma_build.py`, `pySigma-backend-wazuh
 as a **portability check only** — its backend maps to stock field names and omits `if_sid`,
 so the rules that actually fire are the hand-written ones above.
 
+## Docs
+
+Full site: **[mhdfadlyy.github.io/detection-lab-lite](https://mhdfadlyy.github.io/detection-lab-lite/)**
+— [architecture](https://mhdfadlyy.github.io/detection-lab-lite/architecture/),
+a [page per detection](https://mhdfadlyy.github.io/detection-lab-lite/detections/)
+(logic + attack + how it fires), the [coverage matrix](https://mhdfadlyy.github.io/detection-lab-lite/coverage/),
+and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-detection-lab-lite/).
+
 ## Status
 
-**Stages 1–3 done.** **15 detections across 8 ATT&CK tactics**, each with a self-contained
-scenario — `./lab up && ./lab test` replays every attack and asserts the alert fires,
-**15/15 green** locally and in GitHub Actions CI (a required check that boots the full stack).
-Both engines (Wazuh FIM + Falco/eBPF) land in one alert store; coverage is published as an
-[ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json).
+**15 detections across 8 ATT&CK tactics**, each with a self-contained scenario —
+`./lab up && ./lab test` replays every attack and asserts the alert fires, **15/15 green**
+locally and in GitHub Actions CI (a required check that boots the full stack). Both engines
+(Wazuh FIM + Falco/eBPF) land in one alert store.
 
-Next (Stage 4): demo GIF, per-detection docs pages, `v0.1.0`, LinkedIn writeup.
-This stage never really closes — detections keep getting added.
-
-This is a long-lived project with no deadline — see [coverage](docs/coverage.md), the
-[project plan](docs/plan.md), and `CONTRIBUTING.md` for the capability-stage roadmap.
+Long-lived project, no deadline — `CONTRIBUTING.md` has the "add a detection in ~5 minutes"
+walkthrough and the capability-stage roadmap. **Detection ideas and PRs welcome** — open a
+[detection request](https://github.com/MhdFadlyy/detection-lab-lite/issues/new?template=detection-request.yml),
+and a ⭐ helps if this is useful to you.
 
 ## License
 

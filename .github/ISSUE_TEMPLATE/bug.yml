@@ -1,0 +1,34 @@
+name: Bug report
+description: Something in the lab or harness doesn't work
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened vs. what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Repro steps
+      placeholder: |
+        1. ./lab up
+        2. ./lab test
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Relevant output
+      description: "`./lab test` output, a failing `./lab verify`, container logs (`./lab logs <svc>`)."
+      render: text
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: "Kernel (`uname -r`), Docker version, and — if Falco is involved — `docker logs dll-falco | head`."
+      placeholder: "kernel 6.11.0, Docker 27.3, Falco 0.44.1"
+    validations:
+      required: true
