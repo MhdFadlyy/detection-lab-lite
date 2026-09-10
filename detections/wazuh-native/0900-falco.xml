@@ -54,4 +54,25 @@
     <mitre><id>T1105</id></mitre>
   </rule>
 
+  <rule id="100916" level="10">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Setuid Bit Set$</field>
+    <description>Falco: setuid/setgid bit set via chmod (T1548.001)</description>
+    <mitre><id>T1548.001</id></mitre>
+  </rule>
+
+  <rule id="100917" level="10">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Shell History Tampering$</field>
+    <description>Falco: shell history file truncated or deleted (T1070.003)</description>
+    <mitre><id>T1070.003</id></mitre>
+  </rule>
+
+  <rule id="100918" level="6">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Network Service Scan$</field>
+    <description>Falco: nc/nmap-style port scan from a workload (T1046)</description>
+    <mitre><id>T1046</id></mitre>
+  </rule>
+
 </group>

@@ -26,7 +26,7 @@ def _since(sc: Scenario) -> float:
     return time.time() - 600
 
 
-def verify_one(tid: str, timeout: int = 90) -> bool:
+def verify_one(tid: str, timeout: int = 120) -> bool:
     sc = Scenario.load(tid)
     since = _since(sc)
     q = query_falco_alert if sc.expect_engine == "falco" else query_wazuh_alert
@@ -44,9 +44,13 @@ def verify_one(tid: str, timeout: int = 90) -> bool:
 
 def main(argv: list[str]) -> int:
     if argv and argv[0] == "--all":
-        # attacks already ran; let the pipeline settle, then poll each (returns on hit)
+        # attacks already ran; let the pipeline settle, then poll each (returns on hit).
+        # FIM alerts are the slow ones, so verify the falco scenarios first — by the
+        # time we reach the wazuh ones their alerts have had extra seconds to land.
         time.sleep(20)
-        results = {p.stem: verify_one(p.stem.split("_")[0]) for p in Scenario.all()}
+        scs = sorted(Scenario.all(),
+                     key=lambda p: Scenario.load(p.stem.split("_")[0]).expect_engine != "falco")
+        results = {p.stem: verify_one(p.stem.split("_")[0]) for p in scs}
         failed = [k for k, ok in results.items() if not ok]
         print(f"\n[verify] {len(results) - len(failed)}/{len(results)} passed")
         return 1 if failed else 0

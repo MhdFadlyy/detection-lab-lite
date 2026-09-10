@@ -1,0 +1,9 @@
+technique: T1046
+description: Port-probe in-lab hosts with netcat -z (network service discovery)
+runner: script
+command: |
+  for p in 22 1514 9200 5601; do timeout 2 nc -zv wazuh.manager $p 2>&1; done
+  timeout 2 nc -zv wazuh.indexer 9200 2>&1 || true
+expect:
+  engine: falco
+  rule: DLL Network Service Scan

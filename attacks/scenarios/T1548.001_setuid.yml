@@ -1,0 +1,10 @@
+technique: T1548.001
+description: Set the setuid bit on a dropped binary (privilege-escalation persistence)
+runner: script
+command: |
+  cp /bin/dash /tmp/dll_suid 2>/dev/null || cp /bin/sh /tmp/dll_suid
+  chmod u+s /tmp/dll_suid
+  ls -l /tmp/dll_suid ; rm -f /tmp/dll_suid
+expect:
+  engine: falco
+  rule: DLL Setuid Bit Set

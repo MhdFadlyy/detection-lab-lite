@@ -67,3 +67,39 @@
     container=%container.name)
   priority: WARNING
   tags: [command_and_control, mitre_command_and_control, T1105, T1071.001]
+
+- rule: DLL Setuid Bit Set
+  desc: chmod setting the setuid/setgid bit — privilege-escalation persistence.
+  condition: >
+    spawned_process and proc.name=chmod and
+    (proc.cmdline contains "+s" or proc.cmdline contains "u+s" or proc.cmdline contains "g+s"
+     or proc.cmdline contains " 4755" or proc.cmdline contains " 6755" or proc.cmdline contains " 2755")
+  output: >
+    Setuid/setgid bit set (cmdline=%proc.cmdline user=%user.name container=%container.name)
+  priority: WARNING
+  tags: [privilege_escalation, mitre_privilege_escalation, T1548.001]
+
+- rule: DLL Shell History Tampering
+  desc: Truncating or deleting a shell history file — defense evasion.
+  condition: >
+    spawned_process and
+    ((proc.name in (rm, unlink, truncate, shred) and proc.cmdline contains "history")
+     or (proc.name in (bash, sh, zsh) and proc.cmdline contains "history -c"))
+  output: >
+    Shell history tampered (proc=%proc.name cmdline=%proc.cmdline user=%user.name
+    container=%container.name)
+  priority: WARNING
+  tags: [defense_evasion, mitre_defense_evasion, T1070.003]
+
+- rule: DLL Network Service Scan
+  desc: nc/nmap-style port probing from a workload — network service discovery.
+  condition: >
+    spawned_process and
+    ((proc.name in (nmap, masscan, zmap))
+     or (proc.name in (nc, ncat, netcat) and
+         (proc.cmdline contains " -z" or proc.cmdline contains " -zv")))
+  output: >
+    Network service scan (proc=%proc.name cmdline=%proc.cmdline user=%user.name
+    container=%container.name)
+  priority: NOTICE
+  tags: [discovery, mitre_discovery, T1046]

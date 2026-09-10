@@ -1,0 +1,10 @@
+technique: T1070.003
+description: Truncate the bash history file to cover tracks
+runner: script
+command: |
+  touch /root/.bash_history
+  truncate -s 0 /root/.bash_history
+  ls -l /root/.bash_history
+expect:
+  engine: falco
+  rule: DLL Shell History Tampering
