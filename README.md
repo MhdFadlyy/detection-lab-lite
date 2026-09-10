@@ -15,7 +15,7 @@ asserting the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix
 ```
 
-| `./lab test` replays 12 attacks and asserts every alert — 12/12, locally and in CI | Wazuh catching the persistence scenarios, ATT&CK-tagged |
+| `./lab test` replays 15 attacks and asserts every alert — 15/15, locally and in CI | Wazuh catching the persistence scenarios, ATT&CK-tagged |
 |---|---|
 | ![CI green](docs/img/ci-green-12-12.jpg) | ![Wazuh FIM detections](docs/img/wazuh-fim-detections.jpg) |
 
@@ -80,13 +80,14 @@ so the rules that actually fire are the hand-written ones above.
 
 ## Status
 
-**Stage 2 — Detection library.** Harness complete (`runner` / `verify` / `report` /
-`sigma_build` / Atomic Red Team wrapper). **12 detections across 6 ATT&CK tactics**, each
-with a self-contained scenario — `./lab up && ./lab test` replays every attack and asserts
-the alert fires. **12/12 green** on a real Linux host (Docker Engine on a modern kernel).
+**Stages 1–3 done.** **15 detections across 8 ATT&CK tactics**, each with a self-contained
+scenario — `./lab up && ./lab test` replays every attack and asserts the alert fires,
+**15/15 green** locally and in GitHub Actions CI (a required check that boots the full stack).
+Both engines (Wazuh FIM + Falco/eBPF) land in one alert store; coverage is published as an
+[ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json).
 
-CI (`.github/workflows/ci.yml`) lints on every push **and** boots the whole stack to replay
-all 12 attacks and assert every alert — a required check, green end-to-end.
+Next (Stage 4): demo GIF, per-detection docs pages, `v0.1.0`, LinkedIn writeup.
+This stage never really closes — detections keep getting added.
 
 This is a long-lived project with no deadline — see [coverage](docs/coverage.md), the
 [project plan](docs/plan.md), and `CONTRIBUTING.md` for the capability-stage roadmap.

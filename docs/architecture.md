@@ -67,5 +67,5 @@ Then each `attacks/scenarios/*.yml` is replayed inside `target-linux` and `verif
 the Wazuh indexer for the expected alert (`rule.id` for FIM, `data.rule` for Falco).
 
 **CI:** the same `./lab test` runs in GitHub Actions as a required check — boots the stack,
-replays 12/12, asserts every alert. Falco needs kernel ≥ 5.8 and, for kernels ≥ 6.x, Falco
+replays every scenario, asserts every alert. Falco needs kernel ≥ 5.8 and, for kernels ≥ 6.x, Falco
 0.44.x (the pinned version) — older Falco fails `scap_init` on newer kernels.

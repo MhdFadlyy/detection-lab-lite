@@ -33,11 +33,11 @@ Capability stages, ordered by dependency — not a schedule. This is a long-live
 detections keep being added regardless of which stage is "current".
 
 - [x] **Stage 1 — Foundation** — stack + `lab` CLI + first detection + public repo
-- [x] **Stage 2 — Detection library** — harness + 12 detections across 6 tactics, each with a
-  self-contained scenario; `./lab test` = 12/12. *(Keep adding detections.)*
-- [~] **Stage 3 — Continuous validation** — CI boots the stack and replays 12/12 as a
-  required check ✅; ATT&CK Navigator layer published to Pages ✅; Falco alerts unified into
-  the Wazuh indexer ✅. Remaining: OpenCanary + a few more scenarios.
+- [x] **Stage 2 — Detection library** — harness + detections across the ATT&CK tactics, each
+  with a self-contained scenario; `./lab test` green. *(Keep adding detections — never closes.)*
+- [x] **Stage 3 — Continuous validation** — CI boots the stack and replays every scenario as
+  a required check; ATT&CK Navigator layer published to Pages; Falco alerts unified into the
+  Wazuh indexer (one alert store); 15 detections across 8 tactics.
 - [ ] **Stage 4 — Polish & first release** — mkdocs site content, demo GIF, README screenshots,
   issue/PR templates, tag `v0.1.0`, writeup
 - [ ] **Ongoing** — Windows + Sysmon target, Caldera, scheduled feed updates, community PRs
