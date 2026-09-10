@@ -15,11 +15,13 @@ asserting the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix
 ```
 
-| `./lab test` replays 15 attacks and asserts every alert — 15/15, locally and in CI | Wazuh catching the persistence scenarios, ATT&CK-tagged |
+| `./lab test` replays every attack and asserts every alert — 15/15, locally and in CI | Wazuh catching the persistence scenarios, ATT&CK-tagged |
 |---|---|
-| ![CI green](docs/img/ci-green-12-12.jpg) | ![Wazuh FIM detections](docs/img/wazuh-fim-detections.jpg) |
+| ![CI green](docs/img/ci-green.jpg) | ![Wazuh FIM detections](docs/img/wazuh-fim-detections.jpg) |
 
-📊 **[Coverage in the MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)** — auto-generated from the detections + the CI test results.
+📊 **[Coverage in the MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)** — auto-generated from the detections + CI results ([layer JSON](https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)).
+
+![ATT&CK Navigator coverage](docs/img/attack-navigator.jpg)
 
 ## What's in the box
 
