@@ -20,5 +20,5 @@ falsepositives:
 level: high
 dll:
   engine: falco
-  falco_rule: DLL Sensitive File Read
+  falco_rule: Read sensitive file untrusted   # Falco stock rule
   scenario: T1003.008_etc_shadow

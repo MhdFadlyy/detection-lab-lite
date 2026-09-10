@@ -1,10 +1,10 @@
 technique: T1098.004
-description: Append an attacker SSH key to root's authorized_keys, then revert
+description: Append an attacker SSH key to root's authorized_keys (persistence — not reverted; ./lab down clears it)
 runner: script
 command: |
-  mkdir -p /root/.ssh ; cp -a /root/.ssh/authorized_keys /tmp/dll_ak.bak 2>/dev/null || true ;
-  echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIdllTESTKEYdllTESTKEYdllTESTKEY attacker@evil" >> /root/.ssh/authorized_keys ;
-  cp -a /tmp/dll_ak.bak /root/.ssh/authorized_keys 2>/dev/null || sed -i '/attacker@evil/d' /root/.ssh/authorized_keys
+  mkdir -p /root/.ssh
+  echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIdllTESTKEYdllTESTKEYdllTESTKEY attacker@evil" >> /root/.ssh/authorized_keys
+  tail -n1 /root/.ssh/authorized_keys
 expect:
   engine: wazuh
   rule_id: "100312"

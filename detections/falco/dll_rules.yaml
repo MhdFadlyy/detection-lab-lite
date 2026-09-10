@@ -20,17 +20,8 @@
   priority: CRITICAL
   tags: [execution, mitre_execution, T1059.004, T1059.006]
 
-- rule: DLL Sensitive File Read
-  desc: A file-reading utility opening /etc/shadow or /etc/sudoers.
-  condition: >
-    open_read and
-    fd.name in (/etc/shadow, /etc/sudoers) and
-    proc.name in (cat, cp, head, tail, less, more, base64, xxd, dd, vi, vim, nano, python, python3, perl)
-  output: >
-    Sensitive credential file read (file=%fd.name proc=%proc.name cmdline=%proc.cmdline
-    user=%user.name container=%container.name)
-  priority: CRITICAL
-  tags: [credential_access, mitre_credential_access, T1003.008]
+# /etc/shadow reads are covered by Falco's stock "Read sensitive file untrusted"
+# rule (T1555) — no custom rule needed; T1003.008 verifies against that.
 
 - rule: DLL Credential Search
   desc: Recursive grep across the filesystem for credential-like strings.

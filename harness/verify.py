@@ -18,10 +18,10 @@ from common import (
 
 
 def _since(sc: Scenario) -> float:
-    marker = sc.path.parent / ".last-run"
+    marker = sc.path.parent / ".runs" / sc.tid
     if marker.exists():
         try:
-            return float(marker.read_text().split()[1])
+            return float(marker.read_text().split()[0])
         except (IndexError, ValueError):
             pass
     return time.time() - 600

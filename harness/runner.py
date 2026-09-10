@@ -29,8 +29,10 @@ def main(argv: list[str]) -> int:
         if cp.stderr.strip():
             print(cp.stderr.strip(), file=sys.stderr)
 
-    # stash the run marker so `verify` only looks at alerts after this point
-    (sc.path.parent / ".last-run").write_text(f"{sc.tid} {started}\n")
+    # stash a per-scenario run marker so `verify` only looks at alerts after this point
+    runs = sc.path.parent / ".runs"
+    runs.mkdir(exist_ok=True)
+    (runs / sc.tid).write_text(str(started))
     print(f"[runner] done in {time.time() - started:.1f}s — now: ./lab verify {sc.tid}")
     return 0
 

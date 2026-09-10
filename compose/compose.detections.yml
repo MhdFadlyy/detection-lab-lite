@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
 
   falco:
-    image: falcosecurity/falco:0.39.2
+    image: falcosecurity/falco:0.44.1
     container_name: dll-falco
     privileged: true            # runtime syscall visibility on the host kernel
     pid: host

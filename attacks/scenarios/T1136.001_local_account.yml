@@ -1,8 +1,9 @@
 technique: T1136.001
-description: Create a local account with useradd, then delete it
+description: Create a local account with useradd (persistence — not reverted; ./lab down clears it)
 runner: script
 command: |
-  useradd -m -s /bin/bash dll_backdoor ; id dll_backdoor ; userdel -r dll_backdoor
+  useradd -m -s /bin/bash dll_backdoor
+  id dll_backdoor
 expect:
   engine: wazuh
   rule_id: "100313"

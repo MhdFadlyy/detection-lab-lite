@@ -1,9 +1,9 @@
 technique: T1543.002
-description: Drop a malicious systemd .service unit, then remove it
+description: Drop a malicious systemd .service unit (persistence — not reverted; ./lab down clears it)
 runner: script
 command: |
-  printf '[Unit]\nDescription=dll test\n[Service]\nExecStart=/usr/bin/id\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/dll-evil.service ;
-  ls -l /etc/systemd/system/dll-evil.service ; rm -f /etc/systemd/system/dll-evil.service
+  printf '[Unit]\nDescription=dll test\n[Service]\nExecStart=/usr/bin/id\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/dll-evil.service
+  ls -l /etc/systemd/system/dll-evil.service
 expect:
   engine: wazuh
   rule_id: "100311"

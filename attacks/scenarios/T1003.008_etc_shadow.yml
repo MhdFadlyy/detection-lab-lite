@@ -6,4 +6,4 @@ command: |
   rm -f /tmp/dll_passwd /tmp/dll_shadow
 expect:
   engine: falco
-  rule: DLL Sensitive File Read
+  rule: Read sensitive file untrusted   # Falco stock rule, ATT&CK-tagged (T1555)
