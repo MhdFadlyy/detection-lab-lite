@@ -1,5 +1,9 @@
 # detection-lab-lite
 
+[![ci](https://github.com/MhdFadlyy/detection-lab-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/MhdFadlyy/detection-lab-lite/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/MhdFadlyy/detection-lab-lite)](https://github.com/MhdFadlyy/detection-lab-lite/releases)
+[![docs](https://img.shields.io/badge/docs-pages-blue)](https://mhdfadlyy.github.io/detection-lab-lite/)
+
 **A laptop-friendly, Linux-first mini-SOC where every detection is code, tested in CI.**
 
 Most detection labs (DetectionLab, Splunk Attack Range) are heavy, Windows/AD-focused, and
