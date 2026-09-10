@@ -60,7 +60,8 @@ jobs:
           echo "::endgroup::"
           echo "::group::falco"
           docker logs --tail 120 dll-falco 2>&1
-          docker exec dll-falco sh -c 'wc -l /tmp/falco_events.json 2>&1; tail -n 20 /tmp/falco_events.json 2>&1'
+          docker exec dll-falco sh -c 'wc -l /var/log/falco/events.json 2>&1; tail -n 20 /var/log/falco/events.json 2>&1'
+          docker exec dll-target-linux sh -c 'grep -c . /var/log/falco/events.json 2>&1'  # agent-visible
           echo "::endgroup::"
           echo "::group::indexer alert count"
           curl -sk -u admin:SecretPassword 'https://localhost:9200/wazuh-alerts-*/_count'

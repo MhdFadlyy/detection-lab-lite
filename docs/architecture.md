@@ -1,26 +1,31 @@
 # Architecture
 
 ```
-attacks/scenarios/*.yml ──► target-linux (Wazuh agent — FIM / inotify)
-                            suricata (host NIC)   cowrie / opencanary
-                                   │ logs                     │ eBPF syscalls (pid: host)
-                    ┌──────────────┴───────────────┐          ▼
-                    ▼                              ▼       Falco ─► /tmp/falco_events.json
-          Wazuh (manager / indexer / dashboard) ◄─┘
-                    │  alerts API
-                    ▼
-              harness/verify.py  — engine: wazuh → indexer query
-                                   engine: falco → read Falco events file
+attacks/scenarios/*.yml ──► target-linux (victim)
+   │                          │  Wazuh agent: FIM (inotify)  +  tails the shared Falco events file
+   │  suricata (host NIC)     │
+   │  cowrie / opencanary     ▼ eBPF syscalls (pid: host)
+   │                        Falco ─► /var/log/falco/events.json  (shared volume)
+   ▼ logs                     │
+   └──────────────────────────┴──►  Wazuh (manager → indexer → dashboard)
+                                          │  ONE alert store: FIM + Falco both here
+                                          ▼
+              harness/verify.py  — engine: wazuh → indexer rule.id
+                                   engine: falco → indexer data.rule (+ rule.groups: falco)
               harness/report.py  — ATT&CK Navigator layer + coverage.md
-              Grafana            — "SOC overview" dashboard
+              Grafana            — "SOC overview" dashboard (reads the same index)
 ```
 
-## Two detection engines
+## Two detection engines, one alert store
 
-| Engine | Source | Covers | How `verify.py` checks it |
+| Engine | Source | Covers | Lands in the SIEM as |
 |---|---|---|---|
-| **Wazuh FIM** (`syscheck`) | agent inotify on `target-linux` | file changes: systemd units, cron, `authorized_keys`, `/etc/passwd` | query `wazuh-alerts-*` in the indexer for `rule.id` |
-| **Falco** | eBPF syscalls from the host kernel | process exec, sensitive file reads, outbound net | read `/tmp/falco_events.json` in the Falco container for `rule` name |
+| **Wazuh FIM** (`syscheck`) | agent inotify on `target-linux` | file changes: systemd units, cron, `authorized_keys`, `/etc/passwd` | rule `1003xx` (`if_group: syscheck`) |
+| **Falco** | eBPF syscalls from the host kernel | process exec, sensitive file reads, outbound net | Falco writes JSON to a shared volume; the `target-linux` agent tails it (`log_format json`); rules `1009xx` match `data.rule` (the Falco rule name) |
+
+`verify.py` queries the Wazuh indexer for both — a single query path.
+auditd is deliberately **not** used — the kernel audit subsystem is a single host-owned
+context that cannot be scoped to a container.
 
 auditd is deliberately **not** used — the kernel audit subsystem is a single host-owned
 context that cannot be scoped to a container.
@@ -58,7 +63,7 @@ otherwise absorbs the first file changes into the FIM baseline before real-time 
 ready, so early scenarios would silently miss.
 
 Then each `attacks/scenarios/*.yml` is replayed inside `target-linux` and `verify.py` polls
-the matching engine (Falco events file, or the Wazuh indexer) for the expected alert.
+the Wazuh indexer for the expected alert (`rule.id` for FIM, `data.rule` for Falco).
 
 **CI:** the same `./lab test` runs in GitHub Actions as a required check — boots the stack,
 replays 12/12, asserts every alert. Falco needs kernel ≥ 5.8 and, for kernels ≥ 6.x, Falco

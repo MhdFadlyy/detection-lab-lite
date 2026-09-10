@@ -3,15 +3,17 @@
 engine:
   kind: modern_ebpf
 
-# Emit machine-readable events to a file the harness reads via `docker exec`.
+# Emit machine-readable events to a file on a shared volume. The harness reads it
+# directly, and the target-linux Wazuh agent tails it so Falco alerts also land
+# in the SIEM (one alert store).
 json_output: true
 json_include_output_property: true
 json_include_tags_property: true
 
 file_output:
   enabled: true
-  keep_alive: false
-  filename: /tmp/falco_events.json
+  keep_alive: true
+  filename: /var/log/falco/events.json
 
 stdout_output:
   enabled: true

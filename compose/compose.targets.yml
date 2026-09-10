@@ -3,10 +3,14 @@ services:
     build: ${DLL_ROOT}/compose/target-linux
     container_name: dll-target-linux
     hostname: target-linux
-    # The victim. Attacks land here; the Wazuh agent ships FIM telemetry.
-    # Process/syscall activity is observed by Falco from the host kernel.
+    # The victim. Attacks land here; the Wazuh agent ships FIM telemetry AND
+    # tails the shared Falco events file so Falco alerts also reach the SIEM.
     volumes:
       - ${DLL_ROOT}/attacks:/opt/attacks:ro
+      - falco_events:/var/log/falco:ro
     environment:
       - WAZUH_MANAGER=wazuh.manager
     restart: unless-stopped
+
+volumes:
+  falco_events:

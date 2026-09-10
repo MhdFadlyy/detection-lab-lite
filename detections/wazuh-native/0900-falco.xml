@@ -1,0 +1,57 @@
+<!--
+  Falco (eBPF) alerts, ingested from the shared /var/log/falco/events.json by the
+  target-linux agent (log_format json). One rule per Falco rule name so runtime
+  detections land in the SIEM next to FIM. IDs 1009xx.
+-->
+<group name="detection-lab-lite,falco,linux,">
+
+  <rule id="100900" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="source">^syscall$</field>
+    <field name="priority">\.+</field>
+    <description>Falco runtime event (base)</description>
+  </rule>
+
+  <rule id="100910" level="12">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Reverse Shell$</field>
+    <description>Falco: reverse shell — shell I/O redirected to a socket (T1059.004/006)</description>
+    <mitre><id>T1059.004</id><id>T1059.006</id></mitre>
+  </rule>
+
+  <rule id="100911" level="12">
+    <if_sid>100900</if_sid>
+    <field name="rule">^Read sensitive file untrusted$</field>
+    <description>Falco: sensitive credential file read by an untrusted program (T1003.008)</description>
+    <mitre><id>T1003.008</id></mitre>
+  </rule>
+
+  <rule id="100912" level="8">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Credential Search$</field>
+    <description>Falco: filesystem search for secrets (T1552.001)</description>
+    <mitre><id>T1552.001</id></mitre>
+  </rule>
+
+  <rule id="100913" level="5">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Discovery Commands$</field>
+    <description>Falco: account/context discovery command (T1033/T1087.001)</description>
+    <mitre><id>T1033</id><id>T1087.001</id></mitre>
+  </rule>
+
+  <rule id="100914" level="6">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Outbound SSH$</field>
+    <description>Falco: outbound SSH client — possible lateral movement (T1021.004)</description>
+    <mitre><id>T1021.004</id></mitre>
+  </rule>
+
+  <rule id="100915" level="8">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Ingress Tool Transfer$</field>
+    <description>Falco: file download via curl/wget (T1105)</description>
+    <mitre><id>T1105</id></mitre>
+  </rule>
+
+</group>

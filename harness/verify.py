@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Assert that the expected alert fired for a scenario.
 
+Both engines land in the Wazuh indexer:
+  engine: wazuh  -> match rule.id
+  engine: falco  -> match data.rule (the Falco rule name) within rule.groups: falco
+
 Usage: ./lab verify T1059.004        (one scenario)
        ./lab verify --all            (every scenario; used by CI)
 """
@@ -9,12 +13,7 @@ from __future__ import annotations
 import sys
 import time
 
-from common import (
-    Scenario,
-    count_wazuh_alerts,
-    query_falco_alert,
-    query_wazuh_alert,
-)
+from common import Scenario, count_wazuh_alerts, query_falco_alert, query_wazuh_alert
 
 
 def _since(sc: Scenario) -> float:
@@ -27,35 +26,27 @@ def _since(sc: Scenario) -> float:
     return time.time() - 600
 
 
-def verify_one(tid: str, falco_timeout: int = 40, wazuh_timeout: int = 90) -> bool:
+def verify_one(tid: str, timeout: int = 90) -> bool:
     sc = Scenario.load(tid)
     since = _since(sc)
+    q = query_falco_alert if sc.expect_engine == "falco" else query_wazuh_alert
 
-    if sc.expect_engine == "falco":
-        hit = query_falco_alert(sc.expect_rule, since, falco_timeout)
-        if hit:
-            print(f"[verify] {tid}: PASS — falco rule '{sc.expect_rule}'")
-            return True
-        print(f"[verify] {tid}: FAIL — no Falco event for rule '{sc.expect_rule}'")
-        return False
-
-    hit = query_wazuh_alert(sc.expect_rule, since, wazuh_timeout)
+    hit = q(sc.expect_rule, since, timeout)
     if hit:
-        print(f"[verify] {tid}: PASS — wazuh rule {sc.expect_rule} "
-              f"({hit.get('rule', {}).get('description', '?')})")
+        desc = hit.get("rule", {}).get("description", "?")
+        print(f"[verify] {tid}: PASS — {sc.expect_engine} '{sc.expect_rule}' ({desc})")
         return True
     total = count_wazuh_alerts(since)
-    print(f"[verify] {tid}: FAIL — no alert for rule {sc.expect_rule} "
+    print(f"[verify] {tid}: FAIL — no {sc.expect_engine} alert for '{sc.expect_rule}' "
           f"({total} total alerts since the run)")
     return False
 
 
 def main(argv: list[str]) -> int:
     if argv and argv[0] == "--all":
-        # attacks already ran; let the pipelines settle, then poll each (returns on hit)
+        # attacks already ran; let the pipeline settle, then poll each (returns on hit)
         time.sleep(20)
-        results = {p.stem: verify_one(p.stem.split("_")[0])
-                   for p in Scenario.all()}
+        results = {p.stem: verify_one(p.stem.split("_")[0]) for p in Scenario.all()}
         failed = [k for k, ok in results.items() if not ok]
         print(f"\n[verify] {len(results) - len(failed)}/{len(results)} passed")
         return 1 if failed else 0

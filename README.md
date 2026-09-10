@@ -38,23 +38,24 @@ asserting the alert fires.
 ## Architecture
 
 ```
-attacks/scenarios/*.yml ──► target-linux (Wazuh agent: FIM)
-                            suricata (host NIC)   cowrie/opencanary
-                                   │ logs                    │ eBPF syscalls
-                    ┌──────────────┴───────────────┐         ▼
-                    ▼                              ▼      Falco  ──► /tmp/falco_events.json
-          Wazuh (manager/indexer/dashboard)  ◄────┘
-                    │  alerts API
-                    ▼
-              harness/verify.py   engine: wazuh → query indexer
-                                  engine: falco → read Falco events
+attacks/scenarios/*.yml ──► target-linux (victim)
+   suricata (host NIC)        │ Wazuh agent: FIM + tails the shared Falco events file
+   cowrie / opencanary        ▼ eBPF syscalls (pid: host)
+        │                   Falco ──► /var/log/falco/events.json  (shared volume)
+        ▼ logs                │
+        └────────────────────┴──►  Wazuh manager → indexer → dashboard
+                                        │  ONE alert store (FIM + Falco)
+                                        ▼
+              harness/verify.py   engine: wazuh → indexer rule.id
+                                  engine: falco → indexer data.rule
               harness/report.py   ATT&CK Navigator layer + coverage.md
-              Grafana "SOC overview"
+              Grafana "SOC overview" (same index)
 ```
 
-Two detection engines: **Wazuh FIM** for file changes (persistence, credential-file
-writes) and **Falco/eBPF** for process, file-read and network activity. Each scenario
-declares which engine verifies it.
+Two detection engines, **one alert store**: **Wazuh FIM** for file changes (persistence,
+credential-file writes), **Falco/eBPF** for process, file-read and network activity. Falco
+writes JSON to a shared volume; the agent tails it, so Falco alerts land in the Wazuh
+indexer alongside FIM. Each scenario declares which engine verifies it.
 
 ## Requirements
 
@@ -70,7 +71,9 @@ intent. Its `dll:` block says which engine actually verifies it:
 - **`engine: wazuh`** → a hand-written Wazuh FIM rule in `detections/wazuh-native/`
   (`<if_group>syscheck</if_group>`). `verify.py` queries the indexer for `rule.id`.
 - **`engine: falco`** → a rule in `detections/falco/dll_rules.yaml` (or a Falco stock rule).
-  `verify.py` reads `/tmp/falco_events.json` in the Falco container for the rule name.
+  Falco's JSON events are tailed into Wazuh; a rule in `detections/wazuh-native/0900-falco.xml`
+  maps the Falco rule name to a `1009xx` Wazuh id. `verify.py` queries the indexer for
+  `data.rule` (the Falco rule name) within `rule.groups: falco`.
 
 Sigma-to-Wazuh auto-conversion (`harness/sigma_build.py`, `pySigma-backend-wazuh`) runs in CI
 as a **portability check only** — its backend maps to stock field names and omits `if_sid`,

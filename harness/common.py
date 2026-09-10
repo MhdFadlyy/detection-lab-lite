@@ -1,8 +1,6 @@
 """Shared helpers for the detection-lab-lite harness."""
 from __future__ import annotations
 
-import datetime as dt
-import json
 import os
 import pathlib
 import subprocess
@@ -25,7 +23,6 @@ INDEXER_AUTH = (
     os.environ.get("INDEXER_PASSWORD", "SecretPassword"),
 )
 TARGET_CONTAINER = os.environ.get("TARGET_CONTAINER", "dll-target-linux")
-FALCO_EVENTS = "/tmp/falco_events.json"
 
 
 @dataclass
@@ -35,7 +32,7 @@ class Scenario:
     runner: str            # "atomic" | "script"
     command: str
     expect_engine: str     # "wazuh" | "falco"
-    expect_rule: str       # wazuh rule id, or falco rule name
+    expect_rule: str       # wazuh rule id, or Falco rule name (matched via data.rule)
     path: pathlib.Path
 
     @classmethod
@@ -60,22 +57,15 @@ class Scenario:
         return sorted(SCENARIOS.glob("*.yml"))
 
 
-def _docker(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["docker", *args], capture_output=True, text=True)
-
-
 def target_exec(command: str) -> subprocess.CompletedProcess:
     """Run a shell command inside the victim container."""
-    return _docker("exec", TARGET_CONTAINER, "bash", "-lc", command)
+    return subprocess.run(
+        ["docker", "exec", TARGET_CONTAINER, "bash", "-lc", command],
+        capture_output=True, text=True,
+    )
 
 
-def falco_container() -> str | None:
-    r = _docker("ps", "-qf", "name=falco")
-    cid = r.stdout.strip().splitlines()
-    return cid[0] if cid else None
-
-
-# --- Wazuh (indexer) ----------------------------------------------------------
+# --- Wazuh indexer — the single alert store (FIM + Falco both land here) ------
 def _search(body: dict) -> dict:
     r = requests.get(
         f"{INDEXER_URL}/wazuh-alerts-*/_search",
@@ -84,16 +74,7 @@ def _search(body: dict) -> dict:
     return r.json()
 
 
-def query_wazuh_alert(rule_id: str, since_epoch: float, timeout: int = 60) -> dict | None:
-    """Poll the Wazuh indexer for an alert with the given rule id."""
-    body = {
-        "size": 1,
-        "sort": [{"@timestamp": "desc"}],
-        "query": {"bool": {"must": [
-            {"term": {"rule.id": rule_id}},
-            {"range": {"@timestamp": {"gte": int(since_epoch * 1000), "format": "epoch_millis"}}},
-        ]}},
-    }
+def _poll(body: dict, timeout: int) -> dict | None:
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -106,44 +87,33 @@ def query_wazuh_alert(rule_id: str, since_epoch: float, timeout: int = 60) -> di
     return None
 
 
-def count_wazuh_alerts(since_epoch: float) -> int:
-    try:
-        body = {"query": {"range": {"@timestamp": {
-            "gte": int(since_epoch * 1000), "format": "epoch_millis"}}}}
-        return _search({"size": 0, **body}).get("hits", {}).get("total", {}).get("value", -1)
-    except requests.RequestException:
-        return -1
+def _since_clause(since_epoch: float) -> dict:
+    return {"range": {"@timestamp": {"gte": int(since_epoch * 1000), "format": "epoch_millis"}}}
 
 
-# --- Falco (events.json in the container) ------------------------------------
-def _falco_time_epoch(ev: dict) -> float:
-    t = ev.get("time", "").rstrip("Z")
-    if "." in t:  # 2026-09-07T14:00:00.123456789 -> trim ns to us
-        head, frac = t.split(".", 1)
-        t = f"{head}.{frac[:6]}"
-    try:
-        return dt.datetime.fromisoformat(t).replace(tzinfo=dt.UTC).timestamp()
-    except ValueError:
-        return 0.0
+def query_wazuh_alert(rule_id: str, since_epoch: float, timeout: int = 60) -> dict | None:
+    """Poll the indexer for a Wazuh alert with the given rule id."""
+    return _poll({
+        "size": 1, "sort": [{"@timestamp": "desc"}],
+        "query": {"bool": {"must": [{"term": {"rule.id": rule_id}}, _since_clause(since_epoch)]}},
+    }, timeout)
 
 
 def query_falco_alert(rule_name: str, since_epoch: float, timeout: int = 60) -> dict | None:
-    """Poll the Falco events file inside the container for a matching rule."""
-    cid = falco_container()
-    if not cid:
-        return None
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        r = _docker("exec", cid, "sh", "-c", f"cat {FALCO_EVENTS} 2>/dev/null")
-        for line in r.stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                ev = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if ev.get("rule") == rule_name and _falco_time_epoch(ev) >= since_epoch - 5:
-                return ev
-        time.sleep(3)
-    return None
+    """Poll the indexer for a Falco-sourced alert (data.rule == the Falco rule name)."""
+    return _poll({
+        "size": 1, "sort": [{"@timestamp": "desc"}],
+        "query": {"bool": {"must": [
+            {"match_phrase": {"data.rule": rule_name}},
+            {"term": {"rule.groups": "falco"}},
+            _since_clause(since_epoch),
+        ]}},
+    }, timeout)
+
+
+def count_wazuh_alerts(since_epoch: float) -> int:
+    try:
+        return _search({"size": 0, "query": _since_clause(since_epoch)}) \
+            .get("hits", {}).get("total", {}).get("value", -1)
+    except requests.RequestException:
+        return -1
