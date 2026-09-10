@@ -15,6 +15,10 @@ asserting the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix
 ```
 
+| `./lab test` replays 12 attacks and asserts every alert — 12/12, locally and in CI | Wazuh catching the persistence scenarios, ATT&CK-tagged |
+|---|---|
+| ![CI green](docs/img/ci-green-12-12.jpg) | ![Wazuh FIM detections](docs/img/wazuh-fim-detections.jpg) |
+
 ## What's in the box
 
 | | |
