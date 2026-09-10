@@ -1,5 +1,8 @@
 site_name: detection-lab-lite
 site_description: A laptop-friendly, Linux-first mini-SOC with detection-as-code
+site_url: https://mhdfadlyy.github.io/detection-lab-lite/
+repo_url: https://github.com/MhdFadlyy/detection-lab-lite
+repo_name: MhdFadlyy/detection-lab-lite
 theme:
   name: material
   palette:
@@ -7,13 +10,21 @@ theme:
     primary: green
   features:
     - navigation.sections
+    - navigation.indexes
     - content.code.copy
 nav:
   - Home: index.md
   - Architecture: architecture.md
   - ATT&CK coverage: coverage.md
-  - Plan: plan.md
+  - Detections: detections/index.md
+  - Writeup: blog/building-detection-lab-lite.md
+  - Roadmap: plan.md
 markdown_extensions:
   - admonition
   - pymdownx.superfences
   - tables
+validation:
+  nav:
+    omitted_files: info      # per-detection pages are linked from detections/index.md
+  links:
+    absolute_links: ignore

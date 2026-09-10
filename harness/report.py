@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Regenerate the ATT&CK coverage matrix and Navigator layer from detections/.
+"""Regenerate the docs coverage matrix, ATT&CK Navigator layer, and per-detection pages.
 
 Usage: ./lab report
-Writes: docs/coverage.md, docs/navigator-layer.json
+Writes: docs/coverage.md, docs/navigator-layer.json, docs/detections/*.md
+Pure file reads — no running stack needed.
 """
 from __future__ import annotations
 
@@ -11,22 +12,38 @@ import re
 
 import yaml
 
-from common import DETECTIONS, ROOT, Scenario
+from common import DETECTIONS, ROOT, SCENARIOS
 
 DOCS = ROOT / "docs"
+DET_DOCS = DOCS / "detections"
 TID_RE = re.compile(r"T\d{4}(?:\.\d{3})?")
 
 REPO = "https://github.com/MhdFadlyy/detection-lab-lite"
 PAGES = "https://mhdfadlyy.github.io/detection-lab-lite"
 NAV = f"https://mitre-attack.github.io/attack-navigator/#layerURL={PAGES}/navigator-layer.json"
 
-COLOR_TESTED = "#2e7d32"        # green — attack replayed + alert asserted in CI
+COLOR_TESTED = "#2e7d32"          # green — attack replayed + alert asserted in CI
 COLOR_DETECTION_ONLY = "#f9a825"  # amber — rule exists, no automated test yet
+
+
+def attack_url(tid: str) -> str:
+    return "https://attack.mitre.org/techniques/" + tid.replace(".", "/") + "/"
+
+
+def tactics_from_tags(tags: list) -> list[str]:
+    out = []
+    for t in tags:
+        t = str(t)
+        if t.startswith("attack.") and not TID_RE.search(t.upper()):
+            name = t.split(".", 1)[1].replace("_", " ").title()
+            if name not in out:
+                out.append(name)
+    return out
 
 
 def collect_detections() -> list[dict]:
     out = []
-    for path in DETECTIONS.rglob("*.yml"):
+    for path in sorted(DETECTIONS.rglob("*.yml")):
         if any(p in path.parts for p in ("wazuh-native", "falco", "generated")):
             continue
         try:
@@ -38,29 +55,59 @@ def collect_detections() -> list[dict]:
         tags = doc.get("tags", []) or []
         tids = sorted({m.group(0) for t in tags for m in [TID_RE.search(str(t).upper())] if m})
         dll = doc.get("dll", {}) or {}
+        engine = dll.get("engine", "wazuh")
         out.append({
+            "doc": doc,
+            "stem": path.stem,
             "title": doc.get("title", path.stem),
             "tids": tids,
+            "tactics": tactics_from_tags(tags),
             "level": doc.get("level", "medium"),
             "path": str(path.relative_to(ROOT)),
-            "engine": dll.get("engine", "wazuh" if dll.get("wazuh_native") else "wazuh"),
+            "engine": engine,
             "rule": dll.get("wazuh_rule_id") or dll.get("falco_rule") or "?",
+            "scenario": dll.get("scenario"),
         })
     return out
 
 
-def scenario_engine_by_tid() -> dict[str, str]:
-    """Map each tested technique id -> verification engine (wazuh | falco)."""
-    out = {}
-    for p in Scenario.all():
-        d = yaml.safe_load(p.read_text())
-        if m := TID_RE.search(str(d.get("technique", ""))):
-            out[m.group(0)] = d.get("expect", {}).get("engine", "wazuh")
+def scenario_by_stem() -> dict[str, dict]:
+    return {p.stem: yaml.safe_load(p.read_text()) for p in SCENARIOS.glob("*.yml")}
+
+
+def tested_tids(scenarios: dict[str, dict]) -> set[str]:
+    out = set()
+    for s in scenarios.values():
+        if m := TID_RE.search(str(s.get("technique", ""))):
+            out.add(m.group(0))
     return out
 
 
-def build_layer(dets: list[dict], tested: set[str]) -> dict:
-    # one entry per technique id, merging metadata from every detection that tags it
+# --- coverage matrix --------------------------------------------------------
+def write_coverage(dets, covered, tested):
+    lines = [
+        "# ATT&CK coverage", "",
+        f"- Detections: **{len(dets)}**",
+        f"- Techniques covered: **{len(covered)}**",
+        f"- Techniques with an automated attack test: **{len(tested & set(covered))}**",
+        "",
+        f"**[Open in the ATT&CK Navigator]({NAV})** "
+        "(green = attack replayed + alert asserted in CI, amber = detection only)",
+        "",
+        "| Technique | Detection | Tactic | Level | Engine | Tested |",
+        "|---|---|---|---|---|---|",
+    ]
+    for d in sorted(dets, key=lambda x: x["tids"]):
+        for t in d["tids"] or ["(untagged)"]:
+            mark = "✅" if t in tested else "—"
+            page = f"detections/{d['stem']}.md"
+            lines.append(f"| [{t}]({page}) | {d['title']} | {', '.join(d['tactics'])} "
+                         f"| {d['level']} | {d['engine']} | {mark} |")
+    (DOCS / "coverage.md").write_text("\n".join(lines) + "\n")
+
+
+# --- Navigator layer -------------------------------------------------------
+def build_layer(dets, tested) -> dict:
     by_tid: dict[str, list[dict]] = {}
     for d in dets:
         for t in d["tids"]:
@@ -106,36 +153,106 @@ def build_layer(dets: list[dict], tested: set[str]) -> dict:
     }
 
 
-def main() -> int:
-    dets = collect_detections()
-    covered = sorted({t for d in dets for t in d["tids"]})
-    engines = scenario_engine_by_tid()
-    tested = set(engines)
+# --- per-detection pages --------------------------------------------------
+def _how_it_fires(d: dict) -> str:
+    if d["engine"] == "falco":
+        r = d["rule"]
+        stock = not str(r).startswith("DLL ")
+        src = ("a Falco stock rule" if stock
+               else f"the custom rule in [`detections/falco/dll_rules.yaml`]({REPO}/blob/main/detections/falco/dll_rules.yaml)")
+        return (f"Falco (eBPF, host syscalls) raises **`{r}`** from {src}. Falco writes its "
+                f"JSON events to a shared volume; the `target-linux` Wazuh agent tails that "
+                f"file, so the alert lands in the Wazuh indexer as a `1009xx` rule "
+                f"([`0900-falco.xml`]({REPO}/blob/main/detections/wazuh-native/0900-falco.xml)), "
+                f"matched on `data.rule`.")
+    return (f"Wazuh FIM (`syscheck`, inotify real-time) fires **rule `{d['rule']}`** from "
+            f"[`detections/wazuh-native/0300-persistence.xml`]"
+            f"({REPO}/blob/main/detections/wazuh-native/0300-persistence.xml) "
+            f"(`<if_group>syscheck</if_group>` + a `file` regex).")
 
-    DOCS.mkdir(exist_ok=True)
-    lines = [
-        "# ATT&CK coverage", "",
-        f"- Detections: **{len(dets)}**",
-        f"- Techniques covered: **{len(covered)}**",
-        f"- Techniques with an automated attack test: **{len(tested & set(covered))}**",
-        "",
-        f"**[Open in the ATT&CK Navigator]({NAV})** "
-        "(green = attack replayed + alert asserted in CI, amber = detection only)",
-        "",
-        "| Technique | Detection | Level | Engine | Tested |",
+
+def write_detection_pages(dets, scenarios, tested):
+    DET_DOCS.mkdir(parents=True, exist_ok=True)
+    for old in DET_DOCS.glob("*.md"):
+        old.unlink()
+
+    for d in dets:
+        doc = d["doc"]
+        tid = d["tids"][0] if d["tids"] else "?"
+        sc = scenarios.get(d["scenario"] or "", {})
+        is_tested = any(t in tested for t in d["tids"])
+        engine_cell = (f"Falco → `{d['rule']}`" if d["engine"] == "falco"
+                       else f"Wazuh FIM → rule `{d['rule']}`")
+
+        md = [
+            f"# {tid} — {d['title']}", "",
+            "| | |", "|---|---|",
+            f"| **ATT&CK** | " + ", ".join(f"[{t}]({attack_url(t)})" for t in d["tids"]) + " |",
+            f"| **Tactic** | {', '.join(d['tactics'])} |",
+            f"| **Severity** | {d['level']} |",
+            f"| **Engine** | {engine_cell} |",
+            f"| **Automated test** | " + ("✅ attack replayed + alert asserted in CI"
+                                          if is_tested else "— not yet") + " |",
+            "",
+            "## What it detects", "",
+            str(doc.get("description", "")).strip(), "",
+            "## Detection logic", "",
+            "```yaml",
+            yaml.safe_dump(doc["detection"], sort_keys=False).strip(),
+            "```", "",
+            _how_it_fires(d), "",
+        ]
+        if sc.get("command"):
+            md += [
+                f"## Attack scenario — `./lab attack {tid}`", "",
+                f"*{sc.get('description', '').strip()}*", "",
+                "```bash", sc["command"].strip(), "```", "",
+                f"`./lab verify {tid}` then asserts the alert reached the indexer.", "",
+            ]
+        if doc.get("falsepositives"):
+            md += ["## Known false positives", ""]
+            md += [f"- {fp}" for fp in doc["falsepositives"]]
+            md += [""]
+        if doc.get("references"):
+            md += ["## References", ""]
+            md += [f"- <{ref}>" for ref in doc["references"]]
+            md += [""]
+        md += [f"---", "",
+               f"*Source: [`{d['path']}`]({REPO}/blob/main/{d['path']})*", ""]
+        (DET_DOCS / f"{d['stem']}.md").write_text("\n".join(md))
+
+    # index
+    idx = [
+        "# Detections", "",
+        f"{len(dets)} detections across {len({t for d in dets for t in d['tactics']})} "
+        "ATT&CK tactics. Each is a Sigma rule with a self-contained attack scenario; the "
+        f"[Navigator layer]({NAV}) and this list are auto-generated by `./lab report`.", "",
+        "| Technique | Detection | Tactic | Engine | Tested |",
         "|---|---|---|---|---|",
     ]
     for d in sorted(dets, key=lambda x: x["tids"]):
-        for t in d["tids"] or ["(untagged)"]:
-            mark = "✅" if t in tested else "—"
-            eng = engines.get(t, d["engine"])
-            lines.append(f"| {t} | {d['title']} | {d['level']} | {eng} | {mark} |")
-    (DOCS / "coverage.md").write_text("\n".join(lines) + "\n")
+        t = d["tids"][0] if d["tids"] else "?"
+        mark = "✅" if any(x in tested for x in d["tids"]) else "—"
+        idx.append(f"| [{t}]({d['stem']}.md) | {d['title']} | {', '.join(d['tactics'])} "
+                   f"| {d['engine']} | {mark} |")
+    (DET_DOCS / "index.md").write_text("\n".join(idx) + "\n")
 
+
+def main() -> int:
+    dets = collect_detections()
+    scenarios = scenario_by_stem()
+    covered = sorted({t for d in dets for t in d["tids"]})
+    tested = tested_tids(scenarios)
+
+    DOCS.mkdir(exist_ok=True)
+    write_coverage(dets, covered, tested)
     (DOCS / "navigator-layer.json").write_text(
         json.dumps(build_layer(dets, tested), indent=2) + "\n")
+    write_detection_pages(dets, scenarios, tested)
+
     print(f"[report] {len(dets)} detections, {len(covered)} techniques, "
-          f"{len(tested & set(covered))} tested -> docs/coverage.md + navigator-layer.json")
+          f"{len(tested & set(covered))} tested -> coverage.md + navigator-layer.json "
+          f"+ {len(dets)} detection pages")
     return 0
 
 
