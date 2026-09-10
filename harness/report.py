@@ -128,7 +128,8 @@ def main() -> int:
     for d in sorted(dets, key=lambda x: x["tids"]):
         for t in d["tids"] or ["(untagged)"]:
             mark = "✅" if t in tested else "—"
-            lines.append(f"| {t} | {d['title']} | {d['level']} | {engines.get(t, d['engine'])} | {mark} |")
+            eng = engines.get(t, d["engine"])
+            lines.append(f"| {t} | {d['title']} | {d['level']} | {eng} | {mark} |")
     (DOCS / "coverage.md").write_text("\n".join(lines) + "\n")
 
     (DOCS / "navigator-layer.json").write_text(
