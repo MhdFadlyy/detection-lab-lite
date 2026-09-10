@@ -89,12 +89,14 @@ cmd_wait_ready() {
     sleep 5
   done
 
-  # canary: touch a watched file and wait until its FIM alert reaches the indexer,
-  # proving the whole agent -> manager -> filebeat -> indexer path is hot.
+  # canary: keep rewriting a watched file until its FIM alert reaches the indexer,
+  # proving the whole agent -> manager -> filebeat -> indexer path is hot. Rewrite
+  # every iteration — an early write can be absorbed into the FIM baseline before
+  # realtime monitoring is ready, and only a *later* change then alerts.
   log "warming up the detection pipeline (FIM canary, up to 240s)"
-  docker compose "${COMPOSE_ARGS[@]}" exec -T target-linux \
-    sh -c 'mkdir -p /etc/cron.d && echo "# dll canary $(date +%s)" > /etc/cron.d/dll-canary' 2>/dev/null
   for _ in $(seq 1 48); do
+    docker compose "${COMPOSE_ARGS[@]}" exec -T target-linux \
+      sh -c 'mkdir -p /etc/cron.d && echo "# dll canary $(date +%s%N)" > /etc/cron.d/dll-canary' 2>/dev/null
     if _idx 'wazuh-alerts-*/_count' -d '{"query":{"wildcard":{"syscheck.path":"*dll-canary*"}}}' \
          2>/dev/null | grep -qE '"count":[1-9]'; then
       log "pipeline hot"; return 0
