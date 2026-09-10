@@ -38,6 +38,7 @@ detections keep being added regardless of which stage is "current".
 - [x] **Stage 3 — Continuous validation** — CI boots the stack and replays every scenario as
   a required check; ATT&CK Navigator layer published to Pages; Falco alerts unified into the
   Wazuh indexer (one alert store); 15 detections across 8 tactics.
-- [ ] **Stage 4 — Polish & first release** — mkdocs site content, demo GIF, README screenshots,
-  issue/PR templates, tag `v0.1.0`, writeup
-- [ ] **Ongoing** — Windows + Sysmon target, Caldera, scheduled feed updates, community PRs
+- [x] **Stage 4 — Polish & first release** — per-detection docs pages, demo GIF, README
+  screenshots, issue/PR templates, writeup, `v0.1.0`
+- [ ] **Ongoing** — Windows + Sysmon target, Caldera, OpenCanary + network detections,
+  Suricata rules, scheduled feed updates, community PRs

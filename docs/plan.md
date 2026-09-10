@@ -22,8 +22,9 @@ Defense Evasion, each with a self-contained scenario. `./lab test` replays and v
 `./lab test` is a required check. ATT&CK Navigator layer published to GitHub Pages. Falco
 alerts unified into the Wazuh indexer (one alert store). 15 detections / 8 tactics.
 
-**Stage 4 — Polish & first release.** mkdocs-material site content, per-detection ADS-style
-pages, demo GIF, README screenshots, issue/PR templates, tag `v0.1.0`, blog writeup.
+**Stage 4 — Polish & first release.** *(done)* Per-detection docs pages (auto-generated),
+demo GIF, README screenshots, issue/PR templates, the [writeup](blog/building-detection-lab-lite.md),
+tagged `v0.1.0`.
 
 **Ongoing (post-v0.1.0).** Windows + Sysmon target, Caldera integration, OpenCanary +
 network-layer detections, Suricata rules, scheduled feed updates, community contributions,
