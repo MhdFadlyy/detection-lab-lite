@@ -1,7 +1,7 @@
 # Overlay on top of wazuh-docker/single-node/docker-compose.yml.
-# Only patches; the upstream file owns the base service definitions.
-# Paths use ${DLL_ROOT} (exported by ./lab) so they resolve no matter which
-# directory compose picks as the project directory.
+# Minimal by design: the upstream manager config already enables authd + the
+# ruleset dir etc/rules, so we only drop our custom rules in and tune the heap.
+# ${DLL_ROOT} is exported by ./lab so paths resolve whatever the project dir is.
 services:
   wazuh.indexer:
     environment:
@@ -9,13 +9,5 @@ services:
 
   wazuh.manager:
     volumes:
-      - ${DLL_ROOT}/compose/wazuh/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf
-      - ${DLL_ROOT}/compose/wazuh/local_rules.xml:/wazuh-config-mount/etc/rules/local_rules.xml
-      - ${DLL_ROOT}/compose/wazuh/local_decoder.xml:/wazuh-config-mount/etc/decoders/local_decoder.xml
-      - ${DLL_ROOT}/detections/wazuh-native:/wazuh-config-mount/etc/rules/detection-lab-lite:ro
-      - suricata_logs:/var/log/suricata:ro
-      - cowrie_logs:/var/log/cowrie:ro
-
-volumes:
-  suricata_logs:
-  cowrie_logs:
+      # loaded automatically via the upstream <rule_dir>etc/rules</rule_dir>
+      - ${DLL_ROOT}/detections/wazuh-native/0300-persistence.xml:/wazuh-config-mount/etc/rules/dll_persistence.xml:ro
