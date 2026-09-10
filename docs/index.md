@@ -2,6 +2,8 @@
 
 A laptop-friendly, Linux-first mini-SOC where **every detection is code, tested in CI**.
 
+![demo — launch an attack, the SOC catches it](img/demo.gif)
+
 - **Docker only** — no Vagrant, no VM images. `./lab up` boots the whole stack.
 - **Detection-as-code** — every Sigma rule is proven by replaying the real attack and
   asserting the alert fires; GitHub Actions does this on every push (15/15 green).

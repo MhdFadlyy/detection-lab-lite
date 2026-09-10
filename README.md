@@ -7,12 +7,14 @@ VM-based. This one is **Docker only — no Vagrant, no VM images** — boots on 
 one command, and proves its detections work by *actually launching the matching attack* and
 asserting the alert fires.
 
+![demo — launch an attack, the SOC catches it](docs/img/demo.gif)
+
 ```
 ./lab bootstrap     # clone wazuh-docker + generate certs (once)
 ./lab up            # pull images (one at a time) + start the stack
 ./lab attack T1059.004
 ./lab verify T1059.004     # -> PASS if the expected alert fired
-./lab report        # regenerate the ATT&CK coverage matrix
+./lab report        # regenerate the ATT&CK coverage matrix + Navigator layer + docs
 ```
 
 | `./lab test` — replay every attack, assert every alert (15/15, local + CI) | Wazuh Threat Hunting — MITRE breakdown of what the replay tripped |
