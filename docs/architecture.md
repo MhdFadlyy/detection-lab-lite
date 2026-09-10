@@ -60,6 +60,6 @@ ready, so early scenarios would silently miss.
 Then each `attacks/scenarios/*.yml` is replayed inside `target-linux` and `verify.py` polls
 the matching engine (Falco events file, or the Wazuh indexer) for the expected alert.
 
-**CI note:** the same `./lab test` runs in GitHub Actions but is advisory — hosted runners
-are unreliable for eBPF probe loading and a full SIEM boot. The authoritative 12/12 is a
-local run on a real Linux host (Falco needs kernel ≥ 5.8; 0.44.x for kernels ≥ 6.x).
+**CI:** the same `./lab test` runs in GitHub Actions as a required check — boots the stack,
+replays 12/12, asserts every alert. Falco needs kernel ≥ 5.8 and, for kernels ≥ 6.x, Falco
+0.44.x (the pinned version) — older Falco fails `scap_init` on newer kernels.

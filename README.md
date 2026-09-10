@@ -77,9 +77,8 @@ so the rules that actually fire are the hand-written ones above.
 with a self-contained scenario — `./lab up && ./lab test` replays every attack and asserts
 the alert fires. **12/12 green** on a real Linux host (Docker Engine on a modern kernel).
 
-CI (`.github/workflows/ci.yml`) runs lint + `sigma check` + `compose config` on every push;
-the full `./lab test` replay also runs there but is **advisory** — GitHub Actions runners
-can be flaky for eBPF (Falco) and a full SIEM boot, so the authoritative gate is a local run.
+CI (`.github/workflows/ci.yml`) lints on every push **and** boots the whole stack to replay
+all 12 attacks and assert every alert — a required check, green end-to-end.
 
 This is a long-lived project with no deadline — see [coverage](docs/coverage.md), the
 [project plan](docs/plan.md), and `CONTRIBUTING.md` for the capability-stage roadmap.

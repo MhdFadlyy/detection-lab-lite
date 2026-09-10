@@ -19,10 +19,11 @@ jobs:
   replay:
     runs-on: ubuntu-latest        # 16 GB / 4 vCPU
     needs: lint
-    # Advisory. `./lab test` is green (12/12) on a real Linux host; GitHub-hosted
-    # runners are unreliable for eBPF (Falco) and a full SIEM boot, so a failure
-    # here does not fail the workflow. Stage 3 = make this reliably green.
-    continue-on-error: true
+    # Full end-to-end: boot the stack, replay every attack, assert every alert.
+    # Green as of Falco 0.44.1 (modern eBPF loads on the hosted-runner kernel).
+    # If a hosted-runner quirk makes this flake, re-add `continue-on-error: true`
+    # here rather than weakening the detections.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
