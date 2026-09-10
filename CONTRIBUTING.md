@@ -36,8 +36,8 @@ detections keep being added regardless of which stage is "current".
 - [x] **Stage 2 — Detection library** — harness + 12 detections across 6 tactics, each with a
   self-contained scenario; `./lab test` = 12/12. *(Keep adding detections.)*
 - [~] **Stage 3 — Continuous validation** — CI boots the stack and replays 12/12 as a
-  required check ✅. Remaining: ATT&CK Navigator layer artifact, more Falco scenarios,
-  OpenCanary, provisioned Grafana "SOC overview" dashboard.
+  required check ✅; ATT&CK Navigator layer published to Pages ✅; Falco alerts unified into
+  the Wazuh indexer ✅. Remaining: OpenCanary + a few more scenarios.
 - [ ] **Stage 4 — Polish & first release** — mkdocs site content, demo GIF, README screenshots,
   issue/PR templates, tag `v0.1.0`, writeup
 - [ ] **Ongoing** — Windows + Sysmon target, Caldera, scheduled feed updates, community PRs

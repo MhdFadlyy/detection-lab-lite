@@ -2,8 +2,8 @@ technique: T1105
 description: Download a file to /tmp with curl (targets an in-lab HTTP service, no external egress)
 runner: script
 command: |
-  timeout 5 curl -fsS -o /tmp/dll_payload http://dll-grafana:3000/robots.txt || \
-  timeout 5 curl -fsS -o /tmp/dll_payload http://wazuh.dashboard:5601/ || true ;
+  timeout 5 curl -fskS -o /tmp/dll_payload https://wazuh.indexer:9200/ || \
+  timeout 5 curl -fsS  -o /tmp/dll_payload http://wazuh.dashboard:5601/ || true
   ls -l /tmp/dll_payload 2>/dev/null ; rm -f /tmp/dll_payload
 expect:
   engine: falco

@@ -18,9 +18,9 @@ Atomic Red Team wrapper). Sigma intent files + hand-written Wazuh rules across E
 Persistence / Credential Access / Discovery / Lateral Movement / C2, each with a self-contained
 scenario. `./lab test` replays and verifies. Never really closes — keep adding detections.
 
-**Stage 3 — Continuous validation.** CI boots the tuned stack headless and `./lab test` goes
-green (drop `continue-on-error`). ATT&CK Navigator layer artifact. Falco as a 2nd engine with
-verified scenarios. OpenCanary. Provisioned Grafana "SOC overview" dashboard.
+**Stage 3 — Continuous validation.** CI boots the tuned stack headless and `./lab test` is a
+required check ✅. ATT&CK Navigator layer published to GitHub Pages ✅. Falco alerts unified
+into the Wazuh indexer (one alert store) ✅. Remaining: OpenCanary + a few more scenarios.
 
 **Stage 4 — Polish & first release.** mkdocs-material site content, per-detection ADS-style
 pages, demo GIF, README screenshots, issue/PR templates, tag `v0.1.0`, blog writeup.

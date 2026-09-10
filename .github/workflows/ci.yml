@@ -36,7 +36,7 @@ jobs:
         run: |
           sudo sysctl -w vm.max_map_count=262144
           cp .env.example .env   # already pins INDEXER_JAVA_OPTS to 1g
-      - name: Bootstrap + start (CI profile — no honeypots/grafana)
+      - name: Bootstrap + start (CI profile — honeypots off by default)
         run: |
           ./lab bootstrap
           COMPOSE_PROFILES= ./lab up

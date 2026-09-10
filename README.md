@@ -32,8 +32,8 @@ asserting the alert fires.
 | **Honeypots** | Cowrie (SSH/Telnet), OpenCanary (`full` profile) |
 | **Attacks** | Atomic Red Team + custom scenarios in `attacks/scenarios/` |
 | **Detections** | Sigma (`detections/`) + hand-written Wazuh rules where Sigma falls short |
-| **Dashboards** | Wazuh dashboard + provisioned Grafana |
-| **Docs** | mkdocs-material site with an auto-generated coverage matrix |
+| **Dashboard** | Wazuh dashboard (Threat Hunting, MITRE ATT&CK, alert search) |
+| **Docs** | mkdocs-material site + auto-generated ATT&CK Navigator layer |
 
 ## Architecture
 
@@ -49,7 +49,6 @@ attacks/scenarios/*.yml ──► target-linux (victim)
               harness/verify.py   engine: wazuh → indexer rule.id
                                   engine: falco → indexer data.rule
               harness/report.py   ATT&CK Navigator layer + coverage.md
-              Grafana "SOC overview" (same index)
 ```
 
 Two detection engines, **one alert store**: **Wazuh FIM** for file changes (persistence,

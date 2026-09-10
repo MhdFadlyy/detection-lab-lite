@@ -13,8 +13,10 @@ attacks/scenarios/*.yml ──► target-linux (victim)
               harness/verify.py  — engine: wazuh → indexer rule.id
                                    engine: falco → indexer data.rule (+ rule.groups: falco)
               harness/report.py  — ATT&CK Navigator layer + coverage.md
-              Grafana            — "SOC overview" dashboard (reads the same index)
 ```
+
+The **Wazuh dashboard** (`https://localhost`, `admin` / `SecretPassword`) is the SOC UI —
+Threat Hunting, the MITRE ATT&CK view, and full alert search over the same index.
 
 ## Two detection engines, one alert store
 
@@ -45,7 +47,6 @@ with `pid: host`. See `SECURITY.md`.
 | `compose/compose.detections.yml` | suricata, falco |
 | `compose/compose.honeypots.yml` | cowrie, opencanary |
 | `compose/compose.targets.yml` | target-linux |
-| `compose/compose.viz.yml` | grafana |
 
 ## Running & verifying
 
