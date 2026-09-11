@@ -31,6 +31,8 @@ def verify_one(tid: str, timeout: int = 120) -> bool:
     since = _since(sc)
     q = query_falco_alert if sc.expect_engine == "falco" else query_wazuh_alert
 
+    print(f"[verify] {tid}: checking ({sc.expect_engine} '{sc.expect_rule}', "
+          f"up to {timeout}s)...")
     hit = q(sc.expect_rule, since, timeout)
     if hit:
         desc = hit.get("rule", {}).get("description", "?")

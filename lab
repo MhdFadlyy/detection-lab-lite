@@ -14,6 +14,10 @@ export COMPOSE_PARALLEL_LIMIT
 # Absolute repo root for compose var-substitution (works regardless of which
 # directory compose treats as the project directory).
 export DLL_ROOT="$ROOT"
+# Unbuffered so ./lab test's per-scenario PASS/FAIL prints as it happens
+# instead of sitting in a pipe buffer until the process exits (matters a lot
+# when this runs under `2>&1 | tee`/CI log capture, not a real tty).
+export PYTHONUNBUFFERED=1
 WAZUH_DIR=".wazuh-docker"
 WAZUH_SINGLE="$WAZUH_DIR/single-node/docker-compose.yml"
 
