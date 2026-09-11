@@ -1,0 +1,29 @@
+title: Repeated login attempts against the Cowrie honeypot
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000510
+status: experimental
+description: >
+  Detects a burst of SSH/Telnet login attempts against the Cowrie honeypot.
+  Fires on volume (3+ attempts within 60s), not on whether the honeypot
+  accepted or rejected the credentials — a real brute-force is a pattern of
+  repeated attempts, not any single failed login.
+references:
+  - https://attack.mitre.org/techniques/T1110/
+  - https://github.com/cowrie/cowrie
+author: detection-lab-lite
+date: 2026-09-11
+tags: [attack.credential_access, attack.t1110]
+logsource:
+  product: cowrie
+  category: authentication
+detection:
+  selection:
+    eventid|startswith: 'cowrie.login.'
+  condition: selection | count() by src_ip > 2
+falsepositives:
+  - Legitimate vulnerability scanning against the honeypot itself
+level: high
+dll:
+  engine: wazuh
+  wazuh_rule_id: "100510"
+  log_source: cowrie
+  scenario: T1110_cowrie_bruteforce

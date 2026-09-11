@@ -1,0 +1,28 @@
+<!--
+  Cowrie (SSH/Telnet honeypot) events, ingested from the shared cowrie.json
+  by the target-linux agent (log_format json). A single login attempt isn't
+  brute force; repeated ones are — this rule fires on volume (frequency),
+  not on whether the honeypot happened to accept or reject the credentials.
+  IDs 1005xx.
+-->
+<group name="detection-lab-lite,cowrie,linux,">
+
+  <rule id="100500" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie\.</field>
+    <description>Cowrie honeypot event (base)</description>
+  </rule>
+
+  <rule id="100509" level="3">
+    <if_sid>100500</if_sid>
+    <field name="eventid">^cowrie\.login\.</field>
+    <description>Cowrie honeypot login attempt</description>
+  </rule>
+
+  <rule id="100510" level="10" frequency="3" timeframe="60">
+    <if_matched_sid>100509</if_matched_sid>
+    <description>Cowrie: repeated login attempts against the honeypot — brute force (T1110)</description>
+    <mitre><id>T1110</id></mitre>
+  </rule>
+
+</group>

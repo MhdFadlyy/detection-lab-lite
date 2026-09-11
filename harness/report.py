@@ -65,6 +65,9 @@ def collect_detections() -> list[dict]:
             "level": doc.get("level", "medium"),
             "path": str(path.relative_to(ROOT)),
             "engine": engine,
+            # what actually fires the wazuh rule: syscheck (FIM) by default,
+            # or a named JSON log source like cowrie/suricata tailed by the agent
+            "source": dll.get("log_source", "syscheck"),
             "rule": dll.get("wazuh_rule_id") or dll.get("falco_rule") or "?",
             "scenario": dll.get("scenario"),
         })
@@ -165,6 +168,19 @@ def _how_it_fires(d: dict) -> str:
                 f"file, so the alert lands in the Wazuh indexer as a `1009xx` rule "
                 f"([`0900-falco.xml`]({REPO}/blob/main/detections/wazuh-native/0900-falco.xml)), "
                 f"matched on `data.rule`.")
+    if d["source"] == "cowrie":
+        return (f"Cowrie (SSH/Telnet honeypot) logs the login attempt as JSON to a shared "
+                f"volume; the `target-linux` agent tails it, and rule `{d['rule']}` in "
+                f"[`0500-cowrie.xml`]({REPO}/blob/main/detections/wazuh-native/0500-cowrie.xml) "
+                f"fires on repeated `cowrie.login.*` events (frequency-based, not on whether "
+                f"the honeypot accepted the credentials).")
+    if d["source"] == "suricata":
+        rule_xml = f"{REPO}/blob/main/detections/wazuh-native/0600-suricata.xml"
+        return (f"Suricata (network IDS, sharing `target-linux`'s network namespace) matches "
+                f"a custom signature in [`compose/suricata/dll.rules`]"
+                f"({REPO}/blob/main/compose/suricata/dll.rules) and writes EVE JSON to a "
+                f"shared volume; the `target-linux` agent tails it, and rule `{d['rule']}` in "
+                f"[`0600-suricata.xml`]({rule_xml}) matches on `alert.signature`.")
     return (f"Wazuh FIM (`syscheck`, inotify real-time) fires **rule `{d['rule']}`** from "
             f"[`detections/wazuh-native/0300-persistence.xml`]"
             f"({REPO}/blob/main/detections/wazuh-native/0300-persistence.xml) "
@@ -181,8 +197,12 @@ def write_detection_pages(dets, scenarios, tested):
         tid = d["tids"][0] if d["tids"] else "?"
         sc = scenarios.get(d["scenario"] or "", {})
         is_tested = any(t in tested for t in d["tids"])
-        engine_cell = (f"Falco → `{d['rule']}`" if d["engine"] == "falco"
-                       else f"Wazuh FIM → rule `{d['rule']}`")
+        if d["engine"] == "falco":
+            engine_cell = f"Falco → `{d['rule']}`"
+        elif d["source"] in ("cowrie", "suricata"):
+            engine_cell = f"Wazuh ({d['source'].title()}) → rule `{d['rule']}`"
+        else:
+            engine_cell = f"Wazuh FIM → rule `{d['rule']}`"
 
         md = [
             f"# {tid} — {d['title']}", "",

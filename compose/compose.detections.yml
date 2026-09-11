@@ -2,15 +2,21 @@ services:
   suricata:
     image: jasonish/suricata:7.0
     container_name: dll-suricata
-    network_mode: host          # needs to see real traffic on the host NIC
+    # Shares target-linux's own network namespace, so it sees exactly the
+    # victim's traffic as "eth0" — deterministic on any host or CI runner.
+    # (network_mode: host would put it on the real host NIC instead, which
+    # never sees container-to-container traffic at all.)
+    network_mode: "service:target-linux"
+    depends_on: [target-linux]
     cap_add: [NET_ADMIN, NET_RAW, SYS_NICE]
     command: >
-      -i ${SURICATA_IFACE:-eth0}
+      -i eth0
+      -S /etc/suricata/rules/dll.rules
       --set outputs.1.eve-log.filename=/var/log/suricata/eve.json
     volumes:
       - suricata_logs:/var/log/suricata
-      # Uses the image's default suricata.yaml. Drop a custom one here later:
-      # - ${DLL_ROOT}/compose/suricata/suricata.yaml:/etc/suricata/suricata.yaml:ro
+      - ${DLL_ROOT}/compose/suricata/dll.rules:/etc/suricata/rules/dll.rules
+      # (not :ro — the image's entrypoint chown -R's /etc/suricata on start)
     restart: unless-stopped
 
   falco:

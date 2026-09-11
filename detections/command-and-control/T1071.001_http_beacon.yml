@@ -1,0 +1,28 @@
+title: Cleartext HTTP beacon marker on the wire
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000610
+status: experimental
+description: >
+  Detects a distinctive marker string in cleartext TCP traffic, standing in
+  for a C2 beacon or exfil string an attacker sends over a plain HTTP-shaped
+  request. Custom Suricata signature, not a stock/ET Open rule, so it's
+  self-contained and doesn't depend on a rule feed download.
+references:
+  - https://attack.mitre.org/techniques/T1071/001/
+author: detection-lab-lite
+date: 2026-09-11
+tags: [attack.command_and_control, attack.t1071.001]
+logsource:
+  product: suricata
+  category: network_alert
+detection:
+  selection:
+    alert.signature: 'DLL HTTP Beacon Marker'
+  condition: selection
+falsepositives:
+  - None expected — the marker string is unique to this lab's scenario
+level: medium
+dll:
+  engine: wazuh
+  wazuh_rule_id: "100610"
+  log_source: suricata
+  scenario: T1071.001_http_beacon

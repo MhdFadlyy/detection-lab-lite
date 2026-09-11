@@ -40,5 +40,7 @@ detections keep being added regardless of which stage is "current".
   Wazuh indexer (one alert store); 15 detections across 8 tactics.
 - [x] **Stage 4 — Polish & first release** — per-detection docs pages, demo GIF, README
   screenshots, issue/PR templates, writeup, `v0.1.0`
-- [ ] **Ongoing** — Windows + Sysmon target, Caldera, OpenCanary + network detections,
-  Suricata rules, scheduled feed updates, community PRs
+- [x] **Post-v0.1.0** — Suricata and Cowrie were running but wired to zero detections; added
+  `T1071.001` (Suricata signature) and `T1110` (Cowrie brute force). 17 detections / 8 tactics.
+- [ ] **Ongoing** — Windows + Sysmon target, Caldera, OpenCanary, scheduled feed updates,
+  community PRs

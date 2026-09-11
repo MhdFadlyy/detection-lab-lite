@@ -1,0 +1,8 @@
+# Custom ruleset for detection-lab-lite (loaded with `-S`, replacing the
+# image's default rules entirely — no ET Open download, no external feed,
+# same "own the ruleset" choice already made for Falco's custom rules).
+#
+# Content-match, not protocol-aware: the scenario doesn't need the
+# destination to understand the request, only for the marker bytes to hit
+# the wire, which is exactly what a network IDS is supposed to catch.
+alert tcp any any -> any any (msg:"DLL HTTP Beacon Marker"; content:"DLL_BEACON_MARKER"; sid:9000001; rev:1;)

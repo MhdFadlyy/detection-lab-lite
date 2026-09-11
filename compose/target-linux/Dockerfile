@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl gnupg lsb-release ca-certificates \
-      python3 iproute2 iputils-ping netcat-openbsd openssh-client cron \
+      python3 iproute2 iputils-ping netcat-openbsd openssh-client sshpass cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Wazuh agent repo + install (single download step)

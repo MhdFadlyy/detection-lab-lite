@@ -1,0 +1,12 @@
+technique: T1110
+description: Repeated SSH login attempts against the Cowrie honeypot (brute force)
+runner: script
+command: |
+  for i in 1 2 3 4 5; do
+    sshpass -p "wrongpass$i" ssh -p 2222 -o StrictHostKeyChecking=no \
+      -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 root@cowrie exit 2>/dev/null
+  done
+  true
+expect:
+  engine: wazuh
+  rule_id: "100510"

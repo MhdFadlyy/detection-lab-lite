@@ -12,4 +12,6 @@ services:
       # our hand-written rules — loaded automatically via the upstream
       # <rule_dir>etc/rules</rule_dir>. FIM (persistence) + Falco-sourced runtime.
       - ${DLL_ROOT}/detections/wazuh-native/0300-persistence.xml:/wazuh-config-mount/etc/rules/dll_persistence.xml:ro
+      - ${DLL_ROOT}/detections/wazuh-native/0500-cowrie.xml:/wazuh-config-mount/etc/rules/dll_cowrie.xml:ro
+      - ${DLL_ROOT}/detections/wazuh-native/0600-suricata.xml:/wazuh-config-mount/etc/rules/dll_suricata.xml:ro
       - ${DLL_ROOT}/detections/wazuh-native/0900-falco.xml:/wazuh-config-mount/etc/rules/dll_falco.xml:ro

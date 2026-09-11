@@ -1,0 +1,8 @@
+technique: T1071.001
+description: Send a distinctive cleartext HTTP-shaped request carrying a beacon marker
+runner: script
+command: |
+  curl -s --max-time 3 "http://cowrie:2222/DLL_BEACON_MARKER" || true
+expect:
+  engine: wazuh
+  rule_id: "100610"

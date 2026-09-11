@@ -26,9 +26,13 @@ alerts unified into the Wazuh indexer (one alert store). 15 detections / 8 tacti
 demo GIF, README screenshots, issue/PR templates, the [writeup](blog/building-detection-lab-lite.md),
 tagged `v0.1.0`.
 
-**Ongoing (post-v0.1.0).** Windows + Sysmon target, Caldera integration, OpenCanary +
-network-layer detections, Suricata rules, scheduled feed updates, community contributions,
-periodic minor releases.
+**Post-v0.1.0.** Suricata and Cowrie were running but backed zero detections at launch,
+closed that gap first (17 detections / 8 tactics now): a custom Suricata signature
+(`T1071.001`) and a Cowrie brute-force detection (`T1110`), both wired into the same one
+Wazuh alert store as FIM and Falco.
+
+**Ongoing.** Windows + Sysmon target, Caldera integration, OpenCanary, scheduled feed
+updates, community contributions, periodic minor releases.
 
 ## Non-goals for v0.1.0
 

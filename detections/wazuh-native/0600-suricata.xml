@@ -1,0 +1,18 @@
+<!--
+  Suricata (network IDS) EVE JSON alerts, ingested from the shared eve.json
+  by the target-linux agent (log_format json). Rules loaded via `-S` are
+  custom, hand-written signatures (compose/suricata/dll.rules) — no ET Open
+  feed dependency. Chains off Wazuh's stock Suricata rule 86601 (which
+  already decodes and matches any `event_type: alert`) rather than
+  re-decoding from scratch. IDs 1006xx.
+-->
+<group name="detection-lab-lite,suricata,network,">
+
+  <rule id="100610" level="9">
+    <if_sid>86601</if_sid>
+    <field name="alert.signature">^DLL HTTP Beacon Marker$</field>
+    <description>Suricata: cleartext beacon marker seen on the wire (T1071.001)</description>
+    <mitre><id>T1071.001</id></mitre>
+  </rule>
+
+</group>

@@ -8,9 +8,13 @@ services:
     volumes:
       - ${DLL_ROOT}/attacks:/opt/attacks:ro
       - falco_events:/var/log/falco:ro
+      - cowrie_logs:/var/log/cowrie:ro
+      - suricata_logs:/var/log/suricata:ro
     environment:
       - WAZUH_MANAGER=wazuh.manager
     restart: unless-stopped
 
 volumes:
   falco_events:
+  cowrie_logs:
+  suricata_logs:

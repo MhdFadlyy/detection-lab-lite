@@ -21,7 +21,7 @@ matching attack* and checking the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix + Navigator layer + docs
 ```
 
-| `./lab test`: replay every attack, assert every alert (15/15, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
+| `./lab test`: replay every attack, assert every alert (17/17, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
 |---|---|
 | ![CI green](docs/img/ci-green.jpg) | ![Wazuh Threat Hunting](docs/img/wazuh-threat-hunting.jpg) |
 
@@ -51,23 +51,24 @@ side by side in the Wazuh event stream:
 ## Architecture
 
 ```
-attacks/scenarios/*.yml ──► target-linux (victim)
-   suricata (host NIC)        │ Wazuh agent: FIM + tails the shared Falco events file
-   cowrie / opencanary        ▼ eBPF syscalls (pid: host)
-        │                   Falco ──► /var/log/falco/events.json  (shared volume)
-        ▼ logs                │
-        └────────────────────┴──►  Wazuh manager → indexer → dashboard
-                                        │  ONE alert store (FIM + Falco)
-                                        ▼
+attacks/scenarios/*.yml ──► target-linux (victim, shares its netns with suricata)
+   suricata (target-linux's own traffic)   │ Wazuh agent: FIM + tails Falco/Suricata/Cowrie logs
+   cowrie / opencanary                     ▼ eBPF syscalls (pid: host)
+        │                                Falco ──► /var/log/falco/events.json  (shared volume)
+        ▼ logs                             │
+        └───────────────────────────────────┴──►  Wazuh manager → indexer → dashboard
+                                                        │  ONE alert store
+                                                        ▼
               harness/verify.py   engine: wazuh → indexer rule.id
                                   engine: falco → indexer data.rule
               harness/report.py   ATT&CK Navigator layer + coverage.md
 ```
 
-Two detection engines, **one alert store**: **Wazuh FIM** for file changes (persistence,
-credential-file writes), **Falco/eBPF** for process, file-read and network activity. Falco
-writes JSON to a shared volume; the agent tails it, so Falco alerts land in the Wazuh
-indexer alongside FIM. Each scenario declares which engine verifies it.
+**One alert store**, fed by four log sources: **Wazuh FIM** for file changes (persistence,
+credential-file writes), **Falco/eBPF** for process, file-read and network activity,
+**Suricata** for cleartext network signatures, and **Cowrie** for honeypot login attempts.
+Falco/Suricata/Cowrie all write JSON to a shared volume; the agent tails each, so every
+alert lands in the same Wazuh indexer. Each scenario declares which engine verifies it.
 
 ## Requirements
 
@@ -80,8 +81,11 @@ indexer alongside FIM. Each scenario declares which engine verifies it.
 Each detection is a **Sigma rule** in `detections/<tactic>/`, the portable, human-readable
 intent. Its `dll:` block says which engine actually verifies it:
 
-- **`engine: wazuh`** → a hand-written Wazuh FIM rule in `detections/wazuh-native/`
-  (`<if_group>syscheck</if_group>`). `verify.py` queries the indexer for `rule.id`.
+- **`engine: wazuh`** → a hand-written Wazuh rule in `detections/wazuh-native/`, either FIM
+  (`<if_group>syscheck</if_group>`, `1003xx`) or a JSON log the agent tails from a shared
+  volume: Cowrie (`0500-cowrie.xml`, `1005xx`) or Suricata (`0600-suricata.xml`, `1006xx`,
+  chained off Wazuh's own stock Suricata rule). `verify.py` queries the indexer for `rule.id`
+  either way, an optional `dll.log_source` tags which one for the docs.
 - **`engine: falco`** → a rule in `detections/falco/dll_rules.yaml` (or a Falco stock rule).
   Falco's JSON events are tailed into Wazuh; a rule in `detections/wazuh-native/0900-falco.xml`
   maps the Falco rule name to a `1009xx` Wazuh id. `verify.py` queries the indexer for
@@ -102,10 +106,10 @@ and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-det
 ## Status
 
 **[v0.1.0 released](https://github.com/MhdFadlyy/detection-lab-lite/releases/tag/v0.1.0).**
-15 detections across 8 ATT&CK tactics, each with a self-contained scenario.
-`./lab up && ./lab test` replays every attack and asserts the alert fires: **15/15 green**
-locally and in GitHub Actions CI (a required check that boots the full stack). Both engines
-(Wazuh FIM + Falco/eBPF) land in one alert store.
+17 detections across 8 ATT&CK tactics, each with a self-contained scenario.
+`./lab up && ./lab test` replays every attack and asserts the alert fires: **17/17 green**
+locally and in GitHub Actions CI (a required check that boots the full stack). Three log
+sources land in one alert store: Wazuh FIM, Falco/eBPF, and now Suricata + Cowrie.
 
 Long-lived project, no deadline. `CONTRIBUTING.md` has the "add a detection in ~5 minutes"
 walkthrough and the capability-stage roadmap. **Detection ideas and PRs welcome**, open a
