@@ -36,7 +36,7 @@ mean something more specific than "the YAML parses."
 host-owned context, you can't hand a container its own. My first version chained every
 detection off `execve` audit events and it caught nothing in CI, zero alerts, for a while I
 assumed it was an enrollment bug. It wasn't. Fix: split telemetry. Wazuh FIM (inotify,
-plays fine in a container) for file changes — persistence, credential-file writes — and
+plays fine in a container) for file changes (persistence, credential-file writes) and
 Falco (eBPF, reads host syscalls) for process execution, sensitive file reads, outbound
 network.
 

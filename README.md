@@ -11,7 +11,7 @@ VM-based. This one skips all that: **Docker only, no Vagrant, no VM images**. Bo
 16 GB laptop with one command, and proves its detections work by *actually launching the
 matching attack* and checking the alert fires.
 
-![demo — launch an attack, the SOC catches it](docs/img/demo.gif)
+![demo: launch an attack, the SOC catches it](docs/img/demo.gif)
 
 ```
 ./lab bootstrap     # clone wazuh-docker + generate certs (once)
@@ -21,16 +21,16 @@ matching attack* and checking the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix + Navigator layer + docs
 ```
 
-| `./lab test` — replay every attack, assert every alert (15/15, local + CI) | Wazuh Threat Hunting — MITRE breakdown of what the replay tripped |
+| `./lab test`: replay every attack, assert every alert (15/15, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
 |---|---|
 | ![CI green](docs/img/ci-green.jpg) | ![Wazuh Threat Hunting](docs/img/wazuh-threat-hunting.jpg) |
 
 Both engines land in one alert store. Here are the FIM (`1003xx`) and Falco (`1009xx`) rules
 side by side in the Wazuh event stream:
 
-![Wazuh events — FIM + Falco detections](docs/img/wazuh-detections.jpg)
+![Wazuh events: FIM + Falco detections](docs/img/wazuh-detections.jpg)
 
-📊 **[Coverage in the MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)** — auto-generated from the detections + CI results ([layer JSON](https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)).
+📊 **[Coverage in the MITRE ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)**, auto-generated from the detections + CI results ([layer JSON](https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)).
 
 ![ATT&CK Navigator coverage](docs/img/attack-navigator.jpg)
 
@@ -71,13 +71,13 @@ indexer alongside FIM. Each scenario declares which engine verifies it.
 
 ## Requirements
 
-- Linux host (containers use the host kernel directly — no VM layer)
+- Linux host (containers use the host kernel directly, no VM layer)
 - Docker Engine 24+ and Compose v2
 - ~8 GB RAM free, ~15 GB disk
 
 ## How detections are defined
 
-Each detection is a **Sigma rule** in `detections/<tactic>/` — the portable, human-readable
+Each detection is a **Sigma rule** in `detections/<tactic>/`, the portable, human-readable
 intent. Its `dll:` block says which engine actually verifies it:
 
 - **`engine: wazuh`** → a hand-written Wazuh FIM rule in `detections/wazuh-native/`
@@ -93,8 +93,8 @@ so the rules that actually fire are the hand-written ones above.
 
 ## Docs
 
-Full site: **[mhdfadlyy.github.io/detection-lab-lite](https://mhdfadlyy.github.io/detection-lab-lite/)**
-— [architecture](https://mhdfadlyy.github.io/detection-lab-lite/architecture/),
+Full site: **[mhdfadlyy.github.io/detection-lab-lite](https://mhdfadlyy.github.io/detection-lab-lite/)**.
+See [architecture](https://mhdfadlyy.github.io/detection-lab-lite/architecture/),
 a [page per detection](https://mhdfadlyy.github.io/detection-lab-lite/detections/)
 (logic + attack + how it fires), the [coverage matrix](https://mhdfadlyy.github.io/detection-lab-lite/coverage/),
 and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-detection-lab-lite/).
@@ -107,10 +107,10 @@ locally and in GitHub Actions CI (a required check that boots the full stack). B
 (Wazuh FIM + Falco/eBPF) land in one alert store.
 
 Long-lived project, no deadline. `CONTRIBUTING.md` has the "add a detection in ~5 minutes"
-walkthrough and the capability-stage roadmap. **Detection ideas and PRs welcome** — open a
+walkthrough and the capability-stage roadmap. **Detection ideas and PRs welcome**, open a
 [detection request](https://github.com/MhdFadlyy/detection-lab-lite/issues/new?template=detection-request.yml),
 and a ⭐ helps if this is useful to you.
 
 ## License
 
-MIT. Offensive tooling — read `SECURITY.md` before running.
+MIT. Offensive tooling: read `SECURITY.md` before running.
