@@ -7,9 +7,9 @@
 **A laptop-friendly, Linux-first mini-SOC where every detection is code, tested in CI.**
 
 Most detection labs (DetectionLab, Splunk Attack Range) are heavy, Windows/AD-focused, and
-VM-based. This one is **Docker only — no Vagrant, no VM images** — boots on a 16 GB laptop with
-one command, and proves its detections work by *actually launching the matching attack* and
-asserting the alert fires.
+VM-based. This one skips all that: **Docker only, no Vagrant, no VM images**. Boots on a
+16 GB laptop with one command, and proves its detections work by *actually launching the
+matching attack* and checking the alert fires.
 
 ![demo — launch an attack, the SOC catches it](docs/img/demo.gif)
 
@@ -25,7 +25,7 @@ asserting the alert fires.
 |---|---|
 | ![CI green](docs/img/ci-green.jpg) | ![Wazuh Threat Hunting](docs/img/wazuh-threat-hunting.jpg) |
 
-Both engines land in one alert store — here the FIM (`1003xx`) and Falco (`1009xx`) rules
+Both engines land in one alert store. Here are the FIM (`1003xx`) and Falco (`1009xx`) rules
 side by side in the Wazuh event stream:
 
 ![Wazuh events — FIM + Falco detections](docs/img/wazuh-detections.jpg)
@@ -88,7 +88,7 @@ intent. Its `dll:` block says which engine actually verifies it:
   `data.rule` (the Falco rule name) within `rule.groups: falco`.
 
 Sigma-to-Wazuh auto-conversion (`harness/sigma_build.py`, `pySigma-backend-wazuh`) runs in CI
-as a **portability check only** — its backend maps to stock field names and omits `if_sid`,
+as a **portability check only**. Its backend maps to stock field names and omits `if_sid`,
 so the rules that actually fire are the hand-written ones above.
 
 ## Docs
@@ -101,12 +101,12 @@ and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-det
 
 ## Status
 
-**15 detections across 8 ATT&CK tactics**, each with a self-contained scenario —
-`./lab up && ./lab test` replays every attack and asserts the alert fires, **15/15 green**
+**15 detections across 8 ATT&CK tactics**, each with a self-contained scenario.
+`./lab up && ./lab test` replays every attack and asserts the alert fires: **15/15 green**
 locally and in GitHub Actions CI (a required check that boots the full stack). Both engines
 (Wazuh FIM + Falco/eBPF) land in one alert store.
 
-Long-lived project, no deadline — `CONTRIBUTING.md` has the "add a detection in ~5 minutes"
+Long-lived project, no deadline. `CONTRIBUTING.md` has the "add a detection in ~5 minutes"
 walkthrough and the capability-stage roadmap. **Detection ideas and PRs welcome** — open a
 [detection request](https://github.com/MhdFadlyy/detection-lab-lite/issues/new?template=detection-request.yml),
 and a ⭐ helps if this is useful to you.

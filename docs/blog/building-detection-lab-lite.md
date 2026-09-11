@@ -1,58 +1,60 @@
 # Building detection-lab-lite
 
-## The gap
+## Why
 
 Every "detection lab" I could find is heavy. Chris Long's DetectionLab, Splunk's Attack
-Range, Wazuh's own PoC environment — they're Vagrant/VM based, Windows/Active-Directory
-first, want 16–32 GB of RAM before they boot, and a lot of them are unmaintained. Great for
-a course, awkward for "I want to write a detection tonight and know it works."
+Range, Wazuh's own PoC environment. Vagrant/VM based, Windows/Active-Directory first, want
+16–32 GB of RAM before they even boot, and a lot of them haven't been touched in a while.
+Fine for a course. Not what I wanted for "I want to write a detection tonight and actually
+know it works."
 
-And that last part is the real gap: in most labs the detections are **not tested**. You
-write a Sigma rule, eyeball it, move on. Whether it actually fires against the technique it
-claims to catch is left as an exercise.
+That last part is the real gap. In most labs the detections just aren't tested. You write a
+Sigma rule, eyeball it, move on, and whether it fires against the technique it claims to
+catch is left as an exercise for whoever inherits the rule later.
 
-## The thesis
-
-**Detection-as-code.** A detection isn't done when the rule is written — it's done when an
-automated test launches the real attack against a running SOC and asserts the alert fired.
-That's the whole project: `./lab test` replays every attack scenario and checks the Wazuh
-indexer for the expected alert, and GitHub Actions runs the same thing on every push. The
-badge is green because the detections genuinely work, not because the YAML parses.
+So the idea for this one: a detection isn't done when the rule is written. It's done when a
+test launches the real attack against a running SOC and the alert actually shows up.
+`./lab test` replays every attack scenario and checks the Wazuh indexer for the expected
+alert, and GitHub Actions runs that same replay on every push. I wanted the green badge to
+mean something more specific than "the YAML parses."
 
 ## The build
 
-- **Docker only.** No VM layer — on Linux the containers share the host kernel. The victim
-  (`target-linux`) is a container too. `./lab up` pulls, builds and starts a full stack:
-  Wazuh (manager + indexer + dashboard), Suricata, Falco, a honeypot, and the victim.
+- **Docker only.** No VM layer, containers share the host kernel on Linux. Even the victim
+  (`target-linux`) is a container. `./lab up` pulls, builds and starts the full stack: Wazuh
+  (manager + indexer + dashboard), Suricata, Falco, a honeypot, and the victim.
 - **`./lab` CLI + a Python harness.** `attack` execs a scenario's command in the victim,
   `verify` polls the indexer, `report` regenerates the coverage matrix and the ATT&CK
   Navigator layer from the rules.
-- **Sigma as the portable intent**, with a hand-written Wazuh or Falco rule as the thing
-  that actually fires. Each detection is `detections/<tactic>/T####.yml` + a scenario +
-  the firing rule.
+- **Sigma as the portable intent**, backed by a hand-written Wazuh or Falco rule that's the
+  thing that actually fires. Each detection is `detections/<tactic>/T####.yml` plus a
+  scenario plus the firing rule.
 
-## Two problems that ate a day each
+## Two problems that each ate a day
 
-1. **auditd doesn't work in a container.** The kernel audit subsystem is a single
-   host-owned context — you can't give a container its own. So the first version, which
-   chained every detection off `execve` audit events, caught *nothing* in CI. The fix was
-   to split telemetry: **Wazuh FIM** (inotify, container-friendly) for file changes —
-   persistence, credential-file writes — and **Falco** (eBPF, reads host syscalls) for
-   process execution, sensitive file reads, and outbound network.
+**auditd doesn't work in a container.** Turns out the kernel audit subsystem is a single
+host-owned context, you can't hand a container its own. My first version chained every
+detection off `execve` audit events and it caught nothing in CI, zero alerts, for a while I
+assumed it was an enrollment bug. It wasn't. Fix: split telemetry. Wazuh FIM (inotify,
+plays fine in a container) for file changes — persistence, credential-file writes — and
+Falco (eBPF, reads host syscalls) for process execution, sensitive file reads, outbound
+network.
 
-2. **Falco 0.39 dies on a 6.x kernel.** `scap_init` failure, crash loop, on both the Arch
-   host and the GitHub runner. Falco 0.44 loads its modern-eBPF probe fine. One version
-   bump, hours to find.
+**Falco 0.39 dies on a 6.x kernel.** `scap_init` failure, crash loop, same story on the Arch
+host and the GitHub runner. 0.44 loads its modern-eBPF probe without complaint. One version
+bump. Took hours to find because the log line doesn't say "wrong version," it just says
+`scap_init` failed and leaves you guessing.
 
-Then I unified the two engines: Falco writes JSON to a shared volume, the Wazuh agent tails
-it, so Falco alerts land in the same indexer as FIM and `verify.py` has a single query
-path.
+After that I unified the two engines so there's one place to look: Falco writes JSON to a
+shared volume, the Wazuh agent tails it, and Falco alerts land in the same indexer as FIM.
+`verify.py` only needs one query path now instead of two.
 
-## Where it's at
+## Status
 
-15 detections across 8 ATT&CK tactics, all replayed-and-asserted in CI. Coverage is
+15 detections across 8 ATT&CK tactics, all replayed and asserted in CI. Coverage is
 published as a [Navigator layer](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json).
-Next: more detections (the library never really closes), a Windows + Sysmon target, and
+
+Next up: more detections (that list never really closes), a Windows + Sysmon target, and
 network-layer detections off the honeypot and Suricata.
 
 *[GitHub](https://github.com/MhdFadlyy/detection-lab-lite)*
