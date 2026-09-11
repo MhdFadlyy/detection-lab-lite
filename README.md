@@ -101,7 +101,8 @@ and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-det
 
 ## Status
 
-**15 detections across 8 ATT&CK tactics**, each with a self-contained scenario.
+**[v0.1.0 released](https://github.com/MhdFadlyy/detection-lab-lite/releases/tag/v0.1.0).**
+15 detections across 8 ATT&CK tactics, each with a self-contained scenario.
 `./lab up && ./lab test` replays every attack and asserts the alert fires: **15/15 green**
 locally and in GitHub Actions CI (a required check that boots the full stack). Both engines
 (Wazuh FIM + Falco/eBPF) land in one alert store.
