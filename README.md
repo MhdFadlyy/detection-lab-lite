@@ -107,7 +107,7 @@ and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-det
 
 ## Status
 
-**[v0.1.0 released](https://github.com/MhdFadlyy/detection-lab-lite/releases/tag/v0.1.0).**
+**[v0.2.0 released](https://github.com/MhdFadlyy/detection-lab-lite/releases/tag/v0.2.0).**
 22 detections across 13 ATT&CK tactics, each with a self-contained scenario.
 `./lab up && ./lab test` replays every attack and asserts the alert fires: **22/22 green**
 locally and in GitHub Actions CI (a required check that boots the full stack). Three log
