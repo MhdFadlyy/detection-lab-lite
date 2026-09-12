@@ -1,0 +1,28 @@
+title: Bulk file deletion via rm -rf or shred
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000920
+status: experimental
+description: Detects rm -rf or shred used for bulk file deletion, outside the shell-history-tampering case which has its own detection.
+references:
+  - https://attack.mitre.org/techniques/T1485/
+author: detection-lab-lite
+date: 2026-09-11
+tags: [attack.impact, attack.t1485]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '/rm'
+    CommandLine|contains: '-rf'
+  selection_shred:
+    Image|endswith: '/shred'
+  filter:
+    CommandLine|contains: 'history'
+  condition: (selection or selection_shred) and not filter
+falsepositives:
+  - Legitimate cleanup scripts removing temp/build directories
+level: high
+dll:
+  engine: falco
+  falco_rule: DLL Data Destruction
+  scenario: T1485_data_destruction

@@ -1,0 +1,9 @@
+technique: T1560.001
+description: Archive a sensitive path with tar before staging it for exfil
+runner: script
+command: |
+  tar czf /tmp/dll_loot.tar.gz /etc/passwd /root/.ssh 2>/dev/null
+  rm -f /tmp/dll_loot.tar.gz
+expect:
+  engine: falco
+  rule: DLL Archive Collection

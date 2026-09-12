@@ -8,6 +8,7 @@ services:
     volumes:
       - cowrie_logs:/cowrie/cowrie-git/var/log/cowrie
       - ${DLL_ROOT}/compose/cowrie/cowrie.cfg:/cowrie/cowrie-git/etc/cowrie.cfg:ro
+      - ${DLL_ROOT}/compose/cowrie/userdb.txt:/cowrie/cowrie-git/etc/userdb.txt:ro
     restart: unless-stopped
 
   opencanary:

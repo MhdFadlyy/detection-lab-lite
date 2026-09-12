@@ -1,0 +1,6 @@
+# Deterministic auth for the lab, so the T1078 scenario always gets a real
+# cowrie.login.success (Cowrie's stock default userdb accepts an unknown mix
+# of creds, not reliable enough to build a test on). No catch-all rule below,
+# so every other username/password (the T1110 brute-force scenario's random
+# wrong guesses included) falls through to a rejection, same as before.
+dll:x:dllpass123

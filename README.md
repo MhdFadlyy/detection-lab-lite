@@ -21,7 +21,7 @@ matching attack* and checking the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix + Navigator layer + docs
 ```
 
-| `./lab test`: replay every attack, assert every alert (17/17, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
+| `./lab test`: replay every attack, assert every alert (21/21, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
 |---|---|
 | ![CI green](docs/img/ci-green.jpg) | ![Wazuh Threat Hunting](docs/img/wazuh-threat-hunting.jpg) |
 
@@ -106,8 +106,8 @@ and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-det
 ## Status
 
 **[v0.1.0 released](https://github.com/MhdFadlyy/detection-lab-lite/releases/tag/v0.1.0).**
-17 detections across 8 ATT&CK tactics, each with a self-contained scenario.
-`./lab up && ./lab test` replays every attack and asserts the alert fires: **17/17 green**
+21 detections across 12 ATT&CK tactics, each with a self-contained scenario.
+`./lab up && ./lab test` replays every attack and asserts the alert fires: **21/21 green**
 locally and in GitHub Actions CI (a required check that boots the full stack). Three log
 sources land in one alert store: Wazuh FIM, Falco/eBPF, and now Suricata + Cowrie.
 

@@ -3,7 +3,8 @@
   by the target-linux agent (log_format json). A single login attempt isn't
   brute force; repeated ones are — this rule fires on volume (frequency),
   not on whether the honeypot happened to accept or reject the credentials.
-  IDs 1005xx.
+  A separate rule below fires on an actually accepted login (userdb.txt
+  gives the T1078 scenario one known-good credential to hit). IDs 1005xx.
 -->
 <group name="detection-lab-lite,cowrie,linux,">
 
@@ -23,6 +24,13 @@
     <if_matched_sid>100509</if_matched_sid>
     <description>Cowrie: repeated login attempts against the honeypot — brute force (T1110)</description>
     <mitre><id>T1110</id></mitre>
+  </rule>
+
+  <rule id="100511" level="10">
+    <if_sid>100500</if_sid>
+    <field name="eventid">^cowrie\.login\.success$</field>
+    <description>Cowrie: a login attempt was accepted by the honeypot (T1078)</description>
+    <mitre><id>T1078</id></mitre>
   </rule>
 
 </group>

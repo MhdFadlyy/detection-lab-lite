@@ -1,0 +1,9 @@
+technique: T1485
+description: Bulk-delete a directory of files with rm -rf
+runner: script
+command: |
+  mkdir -p /tmp/dll_data && touch /tmp/dll_data/file{1,2,3}
+  rm -rf /tmp/dll_data
+expect:
+  engine: falco
+  rule: DLL Data Destruction

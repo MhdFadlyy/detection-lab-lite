@@ -51,7 +51,7 @@ shared volume, the Wazuh agent tails it, and Falco alerts land in the same index
 
 ## Status
 
-17 detections across 8 ATT&CK tactics, all replayed and asserted in CI. Coverage is
+21 detections across 12 ATT&CK tactics, all replayed and asserted in CI. Coverage is
 published as a [Navigator layer](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json).
 
 Next up: more detections (that list never really closes), a Windows + Sysmon target, and

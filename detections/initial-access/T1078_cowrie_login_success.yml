@@ -1,0 +1,27 @@
+title: Accepted login against the Cowrie honeypot
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000511
+status: experimental
+description: >
+  Detects a login the honeypot actually accepted (cowrie.login.success) — a
+  valid-account-style entry into an exposed service, distinct from the T1110
+  brute-force detection which fires on volume regardless of outcome.
+references:
+  - https://attack.mitre.org/techniques/T1078/
+author: detection-lab-lite
+date: 2026-09-11
+tags: [attack.initial_access, attack.t1078]
+logsource:
+  product: cowrie
+  category: authentication
+detection:
+  selection:
+    eventid: 'cowrie.login.success'
+  condition: selection
+falsepositives:
+  - None expected — this honeypot has no legitimate users
+level: high
+dll:
+  engine: wazuh
+  wazuh_rule_id: "100511"
+  log_source: cowrie
+  scenario: T1078_cowrie_login_success

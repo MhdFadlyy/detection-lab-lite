@@ -42,5 +42,8 @@ detections keep being added regardless of which stage is "current".
   screenshots, issue/PR templates, writeup, `v0.1.0`
 - [x] **Post-v0.1.0** — Suricata and Cowrie were running but wired to zero detections; added
   `T1071.001` (Suricata signature) and `T1110` (Cowrie brute force). 17 detections / 8 tactics.
+- [x] **4 empty tactics closed**: Collection (`T1560.001`), Impact (`T1485`), Initial Access
+  (`T1078`, Cowrie's first genuine `login.success` detection), Exfiltration (`T1041`).
+  21 detections across 12 tactics.
 - [ ] **Ongoing** — Windows + Sysmon target, Caldera, OpenCanary, scheduled feed updates,
   community PRs

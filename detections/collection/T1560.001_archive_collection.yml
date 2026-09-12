@@ -1,0 +1,24 @@
+title: Archive of a sensitive path via tar/zip
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000919
+status: experimental
+description: Detects tar/zip/gzip archiving a sensitive-looking path (/etc, /root, /home), a common way to stage data before exfiltration.
+references:
+  - https://attack.mitre.org/techniques/T1560/001/
+author: detection-lab-lite
+date: 2026-09-11
+tags: [attack.collection, attack.t1560.001]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: ['/tar', '/zip', '/gzip']
+    CommandLine|contains: ['/etc', '/root', '/home']
+  condition: selection
+falsepositives:
+  - Legitimate backup jobs archiving those same paths
+level: medium
+dll:
+  engine: falco
+  falco_rule: DLL Archive Collection
+  scenario: T1560.001_archive_collection

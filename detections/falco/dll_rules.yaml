@@ -103,3 +103,26 @@
     container=%container.name)
   priority: NOTICE
   tags: [discovery, mitre_discovery, T1046]
+
+- rule: DLL Archive Collection
+  desc: tar/zip archiving a sensitive-looking path — staging data before exfil.
+  condition: >
+    spawned_process and proc.name in (tar, zip, gzip) and
+    (proc.cmdline contains "/etc" or proc.cmdline contains "/root" or proc.cmdline contains "/home")
+  output: >
+    Archive of sensitive path (proc=%proc.name cmdline=%proc.cmdline user=%user.name
+    container=%container.name)
+  priority: WARNING
+  tags: [collection, mitre_collection, T1560.001]
+
+- rule: DLL Data Destruction
+  desc: Bulk file deletion (rm -rf / shred) outside the shell-history-tampering case.
+  condition: >
+    spawned_process and
+    ((proc.name=shred) or (proc.name=rm and proc.cmdline contains "-rf")) and
+    not proc.cmdline contains "history"
+  output: >
+    Bulk file deletion (proc=%proc.name cmdline=%proc.cmdline user=%user.name
+    container=%container.name)
+  priority: CRITICAL
+  tags: [impact, mitre_impact, T1485]

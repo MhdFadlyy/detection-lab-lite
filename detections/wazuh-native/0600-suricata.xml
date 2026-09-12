@@ -15,4 +15,11 @@
     <mitre><id>T1071.001</id></mitre>
   </rule>
 
+  <rule id="100611" level="10">
+    <if_sid>86601</if_sid>
+    <field name="alert.signature">^DLL Exfil Marker$</field>
+    <description>Suricata: cleartext exfil marker seen on the wire (T1041)</description>
+    <mitre><id>T1041</id></mitre>
+  </rule>
+
 </group>

@@ -1,0 +1,27 @@
+title: Cleartext exfil marker on the wire
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000611
+status: experimental
+description: >
+  Detects a distinctive marker string in cleartext TCP traffic, standing in
+  for data being exfiltrated over the C2 channel. Custom Suricata signature,
+  the same content-match approach as the T1071.001 beacon detection.
+references:
+  - https://attack.mitre.org/techniques/T1041/
+author: detection-lab-lite
+date: 2026-09-11
+tags: [attack.exfiltration, attack.t1041]
+logsource:
+  product: suricata
+  category: network_alert
+detection:
+  selection:
+    alert.signature: 'DLL Exfil Marker'
+  condition: selection
+falsepositives:
+  - None expected — the marker string is unique to this lab's scenario
+level: high
+dll:
+  engine: wazuh
+  wazuh_rule_id: "100611"
+  log_source: suricata
+  scenario: T1041_http_exfil

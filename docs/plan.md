@@ -27,9 +27,12 @@ demo GIF, README screenshots, issue/PR templates, the [writeup](blog/building-de
 tagged `v0.1.0`.
 
 **Post-v0.1.0.** Suricata and Cowrie were running but backed zero detections at launch,
-closed that gap first (17 detections / 8 tactics now): a custom Suricata signature
+closed that gap first (17 detections / 8 tactics): a custom Suricata signature
 (`T1071.001`) and a Cowrie brute-force detection (`T1110`), both wired into the same one
-Wazuh alert store as FIM and Falco.
+Wazuh alert store as FIM and Falco. Then closed the 4 ATT&CK tactics with zero coverage:
+Collection (`T1560.001`), Impact (`T1485`), Initial Access (`T1078`, a seeded Cowrie
+credential so a real `login.success` is reachable), Exfiltration (`T1041`, a second
+Suricata signature). **21 detections across 12 tactics.**
 
 **Ongoing.** Windows + Sysmon target, Caldera integration, OpenCanary, scheduled feed
 updates, community contributions, periodic minor releases.

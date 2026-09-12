@@ -75,4 +75,18 @@
     <mitre><id>T1046</id></mitre>
   </rule>
 
+  <rule id="100919" level="8">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Archive Collection$</field>
+    <description>Falco: archive of a sensitive path — data staged for exfil (T1560.001)</description>
+    <mitre><id>T1560.001</id></mitre>
+  </rule>
+
+  <rule id="100920" level="12">
+    <if_sid>100900</if_sid>
+    <field name="rule">^DLL Data Destruction$</field>
+    <description>Falco: bulk file deletion (T1485)</description>
+    <mitre><id>T1485</id></mitre>
+  </rule>
+
 </group>
