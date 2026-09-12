@@ -18,6 +18,7 @@ nav:
   - ATT&CK coverage: coverage.md
   - Detections: detections/index.md
   - Writeup: blog/building-detection-lab-lite.md
+  - Known limitations: limitations.md
   - Roadmap: plan.md
 markdown_extensions:
   - admonition

@@ -103,7 +103,9 @@ Full site: **[mhdfadlyy.github.io/detection-lab-lite](https://mhdfadlyy.github.i
 See [architecture](https://mhdfadlyy.github.io/detection-lab-lite/architecture/),
 a [page per detection](https://mhdfadlyy.github.io/detection-lab-lite/detections/)
 (logic + attack + how it fires), the [coverage matrix](https://mhdfadlyy.github.io/detection-lab-lite/coverage/),
-and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-detection-lab-lite/).
+a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-detection-lab-lite/), and
+[known limitations](https://mhdfadlyy.github.io/detection-lab-lite/limitations/) (what a
+green badge here does and doesn't prove).
 
 ## Status
 
