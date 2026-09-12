@@ -1,0 +1,9 @@
+technique: T1595.002
+description: Probe the OpenCanary decoy FTP and HTTP services
+runner: script
+command: |
+  timeout 3 curl -s http://opencanary/ >/dev/null 2>&1 || true
+  timeout 3 nc -z opencanary 21 2>&1 || true
+expect:
+  engine: wazuh
+  rule_id: "100710"

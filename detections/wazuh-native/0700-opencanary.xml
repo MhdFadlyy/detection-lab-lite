@@ -1,0 +1,22 @@
+<!--
+  OpenCanary (FTP/HTTP/etc. honeypot) events, ingested from the shared
+  opencanary.log by the target-linux agent (log_format json). Every logged
+  event here is by definition unwanted, nothing legitimate talks to a
+  honeypot, so the base decode itself is alert-worthy (no sub-filter needed).
+  IDs 1007xx.
+-->
+<group name="detection-lab-lite,opencanary,network,">
+
+  <rule id="100700" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="node_id">\.+</field>
+    <description>OpenCanary honeypot event (base)</description>
+  </rule>
+
+  <rule id="100710" level="6">
+    <if_sid>100700</if_sid>
+    <description>OpenCanary: interaction with a decoy service (T1595.002)</description>
+    <mitre><id>T1595.002</id></mitre>
+  </rule>
+
+</group>

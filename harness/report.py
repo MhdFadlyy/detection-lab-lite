@@ -181,6 +181,12 @@ def _how_it_fires(d: dict) -> str:
                 f"({REPO}/blob/main/compose/suricata/dll.rules) and writes EVE JSON to a "
                 f"shared volume; the `target-linux` agent tails it, and rule `{d['rule']}` in "
                 f"[`0600-suricata.xml`]({rule_xml}) matches on `alert.signature`.")
+    if d["source"] == "opencanary":
+        rule_xml = f"{REPO}/blob/main/detections/wazuh-native/0700-opencanary.xml"
+        return (f"OpenCanary (FTP/HTTP decoy services) logs the interaction as JSON to a "
+                f"shared volume; the `target-linux` agent tails it, and rule `{d['rule']}` "
+                f"in [`0700-opencanary.xml`]({rule_xml}) fires on any event, nothing "
+                f"legitimate ever talks to a honeypot.")
     return (f"Wazuh FIM (`syscheck`, inotify real-time) fires **rule `{d['rule']}`** from "
             f"[`detections/wazuh-native/0300-persistence.xml`]"
             f"({REPO}/blob/main/detections/wazuh-native/0300-persistence.xml) "
@@ -199,7 +205,7 @@ def write_detection_pages(dets, scenarios, tested):
         is_tested = any(t in tested for t in d["tids"])
         if d["engine"] == "falco":
             engine_cell = f"Falco → `{d['rule']}`"
-        elif d["source"] in ("cowrie", "suricata"):
+        elif d["source"] in ("cowrie", "suricata", "opencanary"):
             engine_cell = f"Wazuh ({d['source'].title()}) → rule `{d['rule']}`"
         else:
             engine_cell = f"Wazuh FIM → rule `{d['rule']}`"

@@ -21,7 +21,7 @@ matching attack* and checking the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix + Navigator layer + docs
 ```
 
-| `./lab test`: replay every attack, assert every alert (21/21, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
+| `./lab test`: replay every attack, assert every alert (22/22, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
 |---|---|
 | ![CI green](docs/img/ci-green.jpg) | ![Wazuh Threat Hunting](docs/img/wazuh-threat-hunting.jpg) |
 
@@ -42,7 +42,7 @@ side by side in the Wazuh event stream:
 | **Network IDS** | Suricata (EVE JSON → Wazuh) |
 | **Runtime** | Falco (2nd detection engine, host syscalls via eBPF) |
 | **Endpoint** | `target-linux` container: Wazuh agent (FIM / inotify) + Falco eBPF |
-| **Honeypots** | Cowrie (SSH/Telnet), OpenCanary (`full` profile) |
+| **Honeypots** | Cowrie (SSH/Telnet), OpenCanary (FTP/HTTP + more decoys) |
 | **Attacks** | Atomic Red Team + custom scenarios in `attacks/scenarios/` |
 | **Detections** | Sigma (`detections/`) + hand-written Wazuh rules where Sigma falls short |
 | **Dashboard** | Wazuh dashboard (Threat Hunting, MITRE ATT&CK, alert search) |
@@ -64,11 +64,12 @@ attacks/scenarios/*.yml ──► target-linux (victim, shares its netns with su
               harness/report.py   ATT&CK Navigator layer + coverage.md
 ```
 
-**One alert store**, fed by four log sources: **Wazuh FIM** for file changes (persistence,
+**One alert store**, fed by five log sources: **Wazuh FIM** for file changes (persistence,
 credential-file writes), **Falco/eBPF** for process, file-read and network activity,
-**Suricata** for cleartext network signatures, and **Cowrie** for honeypot login attempts.
-Falco/Suricata/Cowrie all write JSON to a shared volume; the agent tails each, so every
-alert lands in the same Wazuh indexer. Each scenario declares which engine verifies it.
+**Suricata** for cleartext network signatures, **Cowrie** for honeypot login attempts, and
+**OpenCanary** for interaction with its decoy FTP/HTTP services. Falco/Suricata/Cowrie/
+OpenCanary all write JSON to a shared volume; the agent tails each, so every alert lands in
+the same Wazuh indexer. Each scenario declares which engine verifies it.
 
 ## Requirements
 
@@ -83,9 +84,10 @@ intent. Its `dll:` block says which engine actually verifies it:
 
 - **`engine: wazuh`** → a hand-written Wazuh rule in `detections/wazuh-native/`, either FIM
   (`<if_group>syscheck</if_group>`, `1003xx`) or a JSON log the agent tails from a shared
-  volume: Cowrie (`0500-cowrie.xml`, `1005xx`) or Suricata (`0600-suricata.xml`, `1006xx`,
-  chained off Wazuh's own stock Suricata rule). `verify.py` queries the indexer for `rule.id`
-  either way, an optional `dll.log_source` tags which one for the docs.
+  volume: Cowrie (`0500-cowrie.xml`, `1005xx`), Suricata (`0600-suricata.xml`, `1006xx`,
+  chained off Wazuh's own stock Suricata rule), or OpenCanary (`0700-opencanary.xml`,
+  `1007xx`). `verify.py` queries the indexer for `rule.id` either way, an optional
+  `dll.log_source` tags which one for the docs.
 - **`engine: falco`** → a rule in `detections/falco/dll_rules.yaml` (or a Falco stock rule).
   Falco's JSON events are tailed into Wazuh; a rule in `detections/wazuh-native/0900-falco.xml`
   maps the Falco rule name to a `1009xx` Wazuh id. `verify.py` queries the indexer for
@@ -106,8 +108,8 @@ and a [writeup](https://mhdfadlyy.github.io/detection-lab-lite/blog/building-det
 ## Status
 
 **[v0.1.0 released](https://github.com/MhdFadlyy/detection-lab-lite/releases/tag/v0.1.0).**
-21 detections across 12 ATT&CK tactics, each with a self-contained scenario.
-`./lab up && ./lab test` replays every attack and asserts the alert fires: **21/21 green**
+22 detections across 13 ATT&CK tactics, each with a self-contained scenario.
+`./lab up && ./lab test` replays every attack and asserts the alert fires: **22/22 green**
 locally and in GitHub Actions CI (a required check that boots the full stack). Three log
 sources land in one alert store: Wazuh FIM, Falco/eBPF, and now Suricata + Cowrie.
 

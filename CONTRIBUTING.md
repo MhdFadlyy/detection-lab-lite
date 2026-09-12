@@ -45,5 +45,7 @@ detections keep being added regardless of which stage is "current".
 - [x] **4 empty tactics closed**: Collection (`T1560.001`), Impact (`T1485`), Initial Access
   (`T1078`, Cowrie's first genuine `login.success` detection), Exfiltration (`T1041`).
   21 detections across 12 tactics.
-- [ ] **Ongoing** — Windows + Sysmon target, Caldera, OpenCanary, scheduled feed updates,
-  community PRs
+- [x] **OpenCanary default-on**: was `profiles: ["full"]` and never actually configured
+  (image refuses to start without a config file). Added one, plus `T1595.002` (Reconnaissance).
+  22 detections across 13 tactics.
+- [ ] **Ongoing** — Windows + Sysmon target, Caldera, scheduled feed updates, community PRs

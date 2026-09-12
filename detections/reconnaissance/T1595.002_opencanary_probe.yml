@@ -1,0 +1,28 @@
+title: Interaction with the OpenCanary decoy service
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000710
+status: experimental
+description: >
+  Detects any interaction with the OpenCanary honeypot (FTP/HTTP decoy
+  services). Nothing legitimate ever talks to a honeypot, so every logged
+  event here is by definition a probe or vulnerability scan.
+references:
+  - https://attack.mitre.org/techniques/T1595/002/
+  - https://github.com/thinkst/opencanary
+author: detection-lab-lite
+date: 2026-09-12
+tags: [attack.reconnaissance, attack.t1595.002]
+logsource:
+  product: opencanary
+  category: network_alert
+detection:
+  selection:
+    node_id|exists: true
+  condition: selection
+falsepositives:
+  - None expected — this honeypot has no legitimate users
+level: medium
+dll:
+  engine: wazuh
+  wazuh_rule_id: "100710"
+  log_source: opencanary
+  scenario: T1595.002_opencanary_probe

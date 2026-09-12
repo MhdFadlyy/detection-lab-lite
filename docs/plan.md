@@ -32,10 +32,12 @@ closed that gap first (17 detections / 8 tactics): a custom Suricata signature
 Wazuh alert store as FIM and Falco. Then closed the 4 ATT&CK tactics with zero coverage:
 Collection (`T1560.001`), Impact (`T1485`), Initial Access (`T1078`, a seeded Cowrie
 credential so a real `login.success` is reachable), Exfiltration (`T1041`, a second
-Suricata signature). **21 detections across 12 tactics.**
+Suricata signature). Then turned OpenCanary on by default (it was profile-gated *and*
+missing a config file, the image won't start without one) and added `T1595.002`, closing
+Reconnaissance. **22 detections across 13 tactics.**
 
-**Ongoing.** Windows + Sysmon target, Caldera integration, OpenCanary, scheduled feed
-updates, community contributions, periodic minor releases.
+**Ongoing.** Windows + Sysmon target, Caldera integration, scheduled feed updates,
+community contributions, periodic minor releases.
 
 ## Non-goals for v0.1.0
 

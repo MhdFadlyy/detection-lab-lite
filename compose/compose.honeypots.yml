@@ -18,9 +18,14 @@ services:
       - "2121:21"     # FTP
       - "8080:80"     # HTTP
     volumes:
-      - cowrie_logs:/var/log/cowrie      # reuse the shared log volume path
+      # The image ships no config by default and refuses to start without
+      # one — this is thinkst/opencanary's own test config, vendored
+      # verbatim, whose default logger already writes JSON to
+      # /var/tmp/opencanary.log.
+      - ${DLL_ROOT}/compose/opencanary/opencanary.conf:/etc/opencanaryd/opencanary.conf:ro
+      - opencanary_logs:/var/tmp
     restart: unless-stopped
-    profiles: ["full"]                   # optional; enable with COMPOSE_PROFILES=full
 
 volumes:
   cowrie_logs:
+  opencanary_logs:

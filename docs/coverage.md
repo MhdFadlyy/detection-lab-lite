@@ -1,8 +1,8 @@
 # ATT&CK coverage
 
-- Detections: **21**
-- Techniques covered: **22**
-- Techniques with an automated attack test: **21**
+- Detections: **22**
+- Techniques covered: **23**
+- Techniques with an automated attack test: **22**
 
 **[Open in the ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)** (green = attack replayed + alert asserted in CI, amber = detection only)
 
@@ -31,3 +31,4 @@
 | [T1548.001](detections/T1548.001_setuid.md) | Setuid/setgid bit set via chmod | Privilege Escalation | high | falco | ✅ |
 | [T1552.001](detections/T1552.001_secrets_in_files.md) | Filesystem grep for secrets | Credential Access | medium | falco | ✅ |
 | [T1560.001](detections/T1560.001_archive_collection.md) | Archive of a sensitive path via tar/zip | Collection | medium | falco | ✅ |
+| [T1595.002](detections/T1595.002_opencanary_probe.md) | Interaction with the OpenCanary decoy service | Reconnaissance | medium | wazuh | ✅ |

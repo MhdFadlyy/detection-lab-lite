@@ -10,6 +10,7 @@ services:
       - falco_events:/var/log/falco:ro
       - cowrie_logs:/var/log/cowrie:ro
       - suricata_logs:/var/log/suricata:ro
+      - opencanary_logs:/var/log/opencanary:ro
     environment:
       - WAZUH_MANAGER=wazuh.manager
     restart: unless-stopped
@@ -18,3 +19,4 @@ volumes:
   falco_events:
   cowrie_logs:
   suricata_logs:
+  opencanary_logs:
