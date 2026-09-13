@@ -15,6 +15,22 @@ services:
       - WAZUH_MANAGER=wazuh.manager
     restart: unless-stopped
 
+  # Second victim host: a lateral-movement / cross-host correlation target.
+  # Same image, own agent name + own lean config (own ossec.conf, sshd on
+  # with one seeded credential — same trick as Cowrie's userdb.txt).
+  target-linux-2:
+    build: ${DLL_ROOT}/compose/target-linux
+    container_name: dll-target-linux-2
+    hostname: target-linux-2
+    volumes:
+      - ${DLL_ROOT}/attacks:/opt/attacks:ro
+      - ${DLL_ROOT}/compose/target-linux/ossec-2.conf:/var/ossec/etc/ossec.conf:ro
+    environment:
+      - WAZUH_MANAGER=wazuh.manager
+      - AGENT_NAME=target-linux-2
+      - SSHD_ENABLE=yes
+    restart: unless-stopped
+
 volumes:
   falco_events:
   cowrie_logs:

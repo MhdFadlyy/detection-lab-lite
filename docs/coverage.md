@@ -1,8 +1,8 @@
 # ATT&CK coverage
 
-- Detections: **22**
-- Techniques covered: **23**
-- Techniques with an automated attack test: **22**
+- Detections: **24**
+- Techniques covered: **25**
+- Techniques with an automated attack test: **24**
 
 **[Open in the ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/#layerURL=https://mhdfadlyy.github.io/detection-lab-lite/navigator-layer.json)** (green = attack replayed + alert asserted in CI, amber = detection only)
 
@@ -26,9 +26,11 @@
 | [T1098.004](detections/T1098.004_authorized_keys.md) | SSH authorized_keys modified | Persistence, Lateral Movement | high | wazuh | ✅ |
 | [T1110](detections/T1110_cowrie_bruteforce.md) | Repeated login attempts against the Cowrie honeypot | Credential Access | high | wazuh | ✅ |
 | [T1136.001](detections/T1136.001_local_account.md) | Local account created | Persistence | medium | wazuh | ✅ |
+| [T1204.002](detections/T1204.002_eicar_malware.md) | EICAR test file hash matched on disk | Execution | critical | wazuh | ✅ |
 | [T1485](detections/T1485_data_destruction.md) | Bulk file deletion via rm -rf or shred | Impact | high | falco | ✅ |
 | [T1543.002](detections/T1543.002_systemd_service.md) | systemd unit file created or modified | Persistence, Privilege Escalation | medium | wazuh | ✅ |
 | [T1548.001](detections/T1548.001_setuid.md) | Setuid/setgid bit set via chmod | Privilege Escalation | high | falco | ✅ |
 | [T1552.001](detections/T1552.001_secrets_in_files.md) | Filesystem grep for secrets | Credential Access | medium | falco | ✅ |
 | [T1560.001](detections/T1560.001_archive_collection.md) | Archive of a sensitive path via tar/zip | Collection | medium | falco | ✅ |
+| [T1570](detections/T1570_lateral_tool_transfer.md) | File copied to a second internal host via scp | Lateral Movement | medium | falco | ✅ |
 | [T1595.002](detections/T1595.002_opencanary_probe.md) | Interaction with the OpenCanary decoy service | Reconnaissance | medium | wazuh | ✅ |

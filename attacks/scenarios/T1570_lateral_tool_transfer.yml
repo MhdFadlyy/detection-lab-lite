@@ -1,0 +1,11 @@
+technique: T1570
+description: Copy a file to a second internal host via scp (lateral pivot)
+runner: script
+command: |
+  echo "not actually malicious, just proving the pivot" > /tmp/dll_payload.txt
+  sshpass -p "pivotpass123" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    /tmp/dll_payload.txt pivot@target-linux-2:/home/pivot/incoming/payload.txt
+  rm -f /tmp/dll_payload.txt
+expect:
+  engine: falco
+  rule: DLL Outbound SSH

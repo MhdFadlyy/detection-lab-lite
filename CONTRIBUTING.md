@@ -48,4 +48,10 @@ detections keep being added regardless of which stage is "current".
 - [x] **OpenCanary default-on**: was `profiles: ["full"]` and never actually configured
   (image refuses to start without a config file). Added one, plus `T1595.002` (Reconnaissance).
   22 detections across 13 tactics.
+- [x] **Second Linux host** (`target-linux-2`): closes the "single clean host" limitation
+  without Active Directory, which would need a real Windows VM and contradicts the whole
+  Docker-only/no-VM pitch. A seeded SSH credential (same trick as Cowrie's `userdb.txt`)
+  lets `target-linux` pivot to it: `T1570` (Lateral Tool Transfer, reuses the existing Falco
+  rule) and `T1204.002` (a signature-based malware detection, EICAR hash via FIM, closes
+  CIS Control 10). 24 detections across 13 tactics, on two correlated hosts.
 - [ ] **Ongoing** — Windows + Sysmon target, Caldera, scheduled feed updates, community PRs

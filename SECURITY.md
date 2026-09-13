@@ -11,6 +11,10 @@ brute-force simulations). It is built to attack **its own containers only**.
   (`network_mode: host`, `privileged`, `pid: host`). Run this on a machine you control —
   a laptop or a throwaway VM/cloud instance — not on shared infrastructure.
 - Default credentials in `.env.example` are **lab-only**. Never reuse them.
+- `target-linux-2` runs `sshd` with a seeded `pivot` account (`pivotpass123`, set in
+  `compose/target-linux/entrypoint.sh`) so the lateral-movement scenario has a deterministic
+  credential to pivot with, same idea as Cowrie's `userdb.txt`. It's only reachable from
+  other containers on this project's own Docker network; don't expose it beyond that.
 - Cowrie/OpenCanary expose honeypot ports. Do not port-forward them from the public internet
   unless you understand the exposure.
 

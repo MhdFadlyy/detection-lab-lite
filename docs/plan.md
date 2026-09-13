@@ -34,7 +34,11 @@ Collection (`T1560.001`), Impact (`T1485`), Initial Access (`T1078`, a seeded Co
 credential so a real `login.success` is reachable), Exfiltration (`T1041`, a second
 Suricata signature). Then turned OpenCanary on by default (it was profile-gated *and*
 missing a config file, the image won't start without one) and added `T1595.002`, closing
-Reconnaissance. **22 detections across 13 tactics.**
+Reconnaissance. **22 detections across 13 tactics.** Then added `target-linux-2`, a second
+Linux host reachable via a seeded SSH credential, closing "single clean host" without Active
+Directory (which would need a real Windows VM and undo the Docker-only/no-VM pitch):
+`T1570` (Lateral Tool Transfer) and `T1204.002` (EICAR hash via FIM, CIS Control 10).
+**24 detections across 13 tactics, on two correlated hosts.**
 
 **Ongoing.** Windows + Sysmon target, Caldera integration, scheduled feed updates,
 community contributions, periodic minor releases.

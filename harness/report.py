@@ -187,6 +187,11 @@ def _how_it_fires(d: dict) -> str:
                 f"shared volume; the `target-linux` agent tails it, and rule `{d['rule']}` "
                 f"in [`0700-opencanary.xml`]({rule_xml}) fires on any event, nothing "
                 f"legitimate ever talks to a honeypot.")
+    if d["source"] == "malware":
+        rule_xml = f"{REPO}/blob/main/detections/wazuh-native/0800-malware.xml"
+        return (f"Wazuh FIM (`syscheck`, inotify real-time) computes a hash for every file "
+                f"under watch; rule `{d['rule']}` in [`0800-malware.xml`]({rule_xml}) matches "
+                f"a known-bad `sha256` regardless of filename or path.")
     return (f"Wazuh FIM (`syscheck`, inotify real-time) fires **rule `{d['rule']}`** from "
             f"[`detections/wazuh-native/0300-persistence.xml`]"
             f"({REPO}/blob/main/detections/wazuh-native/0300-persistence.xml) "
@@ -205,7 +210,7 @@ def write_detection_pages(dets, scenarios, tested):
         is_tested = any(t in tested for t in d["tids"])
         if d["engine"] == "falco":
             engine_cell = f"Falco → `{d['rule']}`"
-        elif d["source"] in ("cowrie", "suricata", "opencanary"):
+        elif d["source"] in ("cowrie", "suricata", "opencanary", "malware"):
             engine_cell = f"Wazuh ({d['source'].title()}) → rule `{d['rule']}`"
         else:
             engine_cell = f"Wazuh FIM → rule `{d['rule']}`"

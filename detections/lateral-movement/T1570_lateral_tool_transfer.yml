@@ -1,0 +1,29 @@
+title: File copied to a second internal host via scp
+id: 8f2a1c40-1b2e-4a7d-9d3c-0dll00000921
+status: experimental
+description: >
+  Detects scp/ssh/sftp client execution used to move a file onto a second,
+  internal host, a lateral-movement pivot rather than the single-host
+  outbound-SSH case (T1021.004). Reuses the same Falco rule since the
+  process-level signal (an ssh-family client running) is identical; the
+  interesting new part is that target-linux-2 exists at all and correlates
+  in the same Wazuh indexer.
+references:
+  - https://attack.mitre.org/techniques/T1570/
+author: detection-lab-lite
+date: 2026-09-12
+tags: [attack.lateral_movement, attack.t1570]
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '/scp'
+  condition: selection
+falsepositives:
+  - Legitimate admin file transfers between hosts you actually operate
+level: medium
+dll:
+  engine: falco
+  falco_rule: DLL Outbound SSH
+  scenario: T1570_lateral_tool_transfer

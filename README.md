@@ -21,7 +21,7 @@ matching attack* and checking the alert fires.
 ./lab report        # regenerate the ATT&CK coverage matrix + Navigator layer + docs
 ```
 
-| `./lab test`: replay every attack, assert every alert (22/22, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
+| `./lab test`: replay every attack, assert every alert (24/24, local + CI) | Wazuh Threat Hunting: MITRE breakdown of what the replay tripped |
 |---|---|
 | ![CI green](docs/img/ci-green.jpg) | ![Wazuh Threat Hunting](docs/img/wazuh-threat-hunting.jpg) |
 
@@ -41,7 +41,7 @@ side by side in the Wazuh event stream:
 | **SIEM** | Wazuh single-node (manager + indexer + dashboard) |
 | **Network IDS** | Suricata (EVE JSON → Wazuh) |
 | **Runtime** | Falco (2nd detection engine, host syscalls via eBPF) |
-| **Endpoint** | `target-linux` container: Wazuh agent (FIM / inotify) + Falco eBPF |
+| **Endpoint** | `target-linux` (Wazuh agent, FIM/inotify + Falco eBPF) + `target-linux-2` (a second, correlated host for lateral-movement scenarios) |
 | **Honeypots** | Cowrie (SSH/Telnet), OpenCanary (FTP/HTTP + more decoys) |
 | **Attacks** | Atomic Red Team + custom scenarios in `attacks/scenarios/` |
 | **Detections** | Sigma (`detections/`) + hand-written Wazuh rules where Sigma falls short |
@@ -110,8 +110,9 @@ green badge here does and doesn't prove).
 ## Status
 
 **[v0.2.0 released](https://github.com/MhdFadlyy/detection-lab-lite/releases/tag/v0.2.0).**
-22 detections across 13 ATT&CK tactics, each with a self-contained scenario.
-`./lab up && ./lab test` replays every attack and asserts the alert fires: **22/22 green**
+24 detections across 13 ATT&CK tactics, each with a self-contained scenario, across two
+correlated Linux hosts. `./lab up && ./lab test` replays every attack and asserts the alert
+fires: **24/24 green**
 locally and in GitHub Actions CI (a required check that boots the full stack). Three log
 sources land in one alert store: Wazuh FIM, Falco/eBPF, and now Suricata + Cowrie.
 
