@@ -1,5 +1,6 @@
 .env
 .wazuh-docker/
+CLAUDE.md
 attacks/scenarios/.last-run
 attacks/scenarios/.runs/
 detections/generated/
